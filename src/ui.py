@@ -1,7 +1,6 @@
-# ui.py
-from typing import Dict
+from typing import Any, Dict
 
-from customtkinter import CTkButton, CTkEntry, CTkFrame, CTkLabel, CTkOptionMenu
+from customtkinter import CTkButton, CTkEntry, CTkLabel, CTkOptionMenu
 
 from enums import PanelType
 
@@ -10,6 +9,15 @@ class InputFields:
     def __init__(self, parent):
         self.parent = parent
         self.inputs: Dict[str, InputField] = {}
+
+    @property
+    def default_inputs(self):
+        default_panel = list(PanelType)[0]  # Get the first item in the enum
+        return {
+            "first_bracket_inset": 10,
+            "panel_width": default_panel.width_inches,
+            "panel_height": default_panel.height_inches
+        }
 
     def create_input_widgets(self):
         """Creates all input widgets and sets them in the parent frame."""
@@ -40,7 +48,7 @@ class InputFields:
                 ),
                 units_label=None,
             ),
-            "inset": InputField(
+            "first_bracket_inset": InputField(
                 label=CTkLabel(self.parent, text="First Bracket Inset"),
                 input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
@@ -70,7 +78,7 @@ class InputFields:
 
 
 class InputField:
-    def __init__(self, label, input_widget, units_label=None):
+    def __init__(self, label, input_widget: CTkEntry | CTkOptionMenu, units_label=None):
         self.label = label
         self.input_widget = input_widget
         self.units_label = units_label
@@ -88,8 +96,12 @@ class InputField:
         from customtkinter import ThemeManager
 
         """Set a new value to the input widget."""
-        self.input_widget.delete(0, "end")  # Clear existing value
-        self.input_widget.insert(0, new_value)
+        if isinstance(self.input_widget, CTkEntry):
+            self.input_widget.delete(0, "end")
+            self.input_widget.insert(0, new_value)
+        elif isinstance(self.input_widget, CTkOptionMenu):
+            self.input_widget.set(new_value)
+        # Optionally notify the user by changing the input_widget border color to green
         if notify and parent:
             self.input_widget.configure(border_color=("#2CC985", "#2FA572"))
             parent.after(
@@ -153,7 +165,7 @@ class RowField:
     def get(self):
         try:
             num_panels = int(self.entry.get())
-            if num_panels < 1 or num_panels > 100: 
+            if num_panels < 1 or num_panels > 100:
                 raise ValueError
             orientation = self.orientation.get()
             return num_panels, orientation

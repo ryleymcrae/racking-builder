@@ -1,36 +1,24 @@
-# controller.py
-from customtkinter import CTkFrame, LEFT
-
-from enums import PanelType
+from customtkinter import LEFT, CTkFrame
 
 
-def update_outputs(preview_frame, input_fields, row_data):
-    """Update the preview based on input fields and row data."""
-    print(row_data)
-    panel_model = input_fields.get_input("panel_model")
-    panel = PanelType.map()[panel_model]
-    width = panel.width_inches
-    height = panel.height_inches
-
+def update_preview_frame(preview_frame, row_data, panel_width, panel_height):
+    """Update the preview based on row data."""
     max_length = 0
+
     for _, (num_panels, orientation) in enumerate(row_data):
         if orientation == "Landscape":
-            xwidth = height
+            xwidth = int(panel_height)
         else:
-            xwidth = width
-        row_length = round(num_panels * xwidth) + num_panels * 2
-        print(row_length)
-        if row_length > 515:
+            xwidth = int(panel_width)
+        row_length = round(num_panels * xwidth) + num_panels
+        if row_length > 525:
             max_length = max(row_length, max_length)
-            print(f"{row_length} is too long!")
-    
-    if max_length > 0:
-        scaling_factor = 515 / max_length
-        width *= scaling_factor
-        height *= scaling_factor
-        print(f"New width: {width}\tNew height: {height}")
 
-    # Clear previous output
+    if max_length > 0:
+        scaling_factor = 525 / max_length
+        panel_width = int(panel_width * scaling_factor)
+        panel_height = int(panel_height * scaling_factor)
+
     for child in preview_frame.winfo_children():
         child.grid_forget()
 
@@ -39,11 +27,11 @@ def update_outputs(preview_frame, input_fields, row_data):
         row_frame.grid(row=row_num, column=0, sticky="nsew")
 
         if orientation == "Landscape":
-            xwidth = height  # Height becomes the width in landscape
-            yheight = width   # Width becomes the height in landscape
+            xwidth = panel_height  # Height becomes the width in landscape
+            yheight = panel_width  # Width becomes the height in landscape
         else:
-            xwidth = width     # Normal width for portrait
-            yheight = height    # Normal height for portrait
+            xwidth = panel_width  # Normal width for portrait
+            yheight = panel_height  # Normal height for portrait
 
         for _ in range(num_panels):
             CTkFrame(
@@ -53,4 +41,4 @@ def update_outputs(preview_frame, input_fields, row_data):
                 fg_color="black",
                 corner_radius=0,
                 border_width=1,
-            ).pack(side=LEFT, padx=1, pady=1,)
+            ).pack(side=LEFT, pady=(0, 2))
