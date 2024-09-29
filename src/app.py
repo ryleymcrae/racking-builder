@@ -84,7 +84,6 @@ class App(CTk):
         for key, input_field in self.input_fields.inputs.items():
             print(key)
             if default_inputs.get(key):
-                print(key, "is being automatically set")
                 input_field.set(default_inputs.get(key))
 
     def init_row_builder(self):
@@ -121,11 +120,15 @@ class App(CTk):
             panel_height = float(self.input_fields.get_input("panel_height"))
             inset = float(self.input_fields.get_input("first_bracket_inset"))
             rafter_spacing = int(self.input_fields.get_input("rafter_spacing"))
-
-            # Get row data
-            row_data = self.row_fields.get_row_data()
             
         except ValueError as e:
+            self.tabview.set("Array Information")
+            return self.show_warning_dialog(str(e))
+        
+        try:
+            row_data = self.row_fields.get_row_data()
+        except ValueError as e:
+            self.tabview.set("Rows")
             return self.show_warning_dialog(str(e))
             
         update_preview_frame(self.preview_frame, row_data, panel_width, panel_height)
