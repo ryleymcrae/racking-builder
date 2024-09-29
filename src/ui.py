@@ -153,9 +153,11 @@ class RowField:
     def get(self):
         try:
             num_panels = int(self.entry.get())
+            if num_panels < 1 or num_panels > 100: 
+                raise ValueError
             orientation = self.orientation.get()
             return num_panels, orientation
         except ValueError:
             raise ValueError(
-                "An entry for the number of panels in a row is invalid. Please ensure the values are all non-empty integers."
+                "An entry for a number of panels is invalid. Please ensure the values are all non-empty integers between 1 and 100"
             )
