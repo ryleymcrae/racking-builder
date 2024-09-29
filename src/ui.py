@@ -56,6 +56,7 @@ class InputFields:
             "first_bracket_inset": 10,
             "panel_width": default_panel.width_inches,
             "panel_height": default_panel.height_inches,
+            "panel_spacing": 0.625,
             "rail_protrusion": 4,
         }
 
@@ -92,8 +93,13 @@ class InputFields:
             "rafter_spacing": InputField(
                 label=CTkLabel(self.parent, text="Rafter Spacing"),
                 input_widget=CTkOptionMenu(
-                    self.parent, values=["12", "18", "19.1875", "24", "32", "48"]
+                    self.parent, values=["12", "16", "19.1875", "24", "32", "48"]
                 ),
+                units_label=CTkLabel(self.parent, text="Inches"),
+            ),
+            "panel_spacing": InputField(
+                label=CTkLabel(self.parent, text="Panel Spacing"),
+                input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
             ),
             "first_bracket_inset": InputField(
