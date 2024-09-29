@@ -1,7 +1,7 @@
-from customtkinter import CTk, CTkButton, CTkFrame, CTkScrollableFrame, CTkTabview
+from customtkinter import CTk, CTkButton, CTkFrame, CTkScrollableFrame
 
 from controller import update_preview_frame
-from ui import InputFields, RowFields
+from ui import InputFields, RowFields, TabView
 from utils import get_icon_path
 
 
@@ -13,8 +13,11 @@ class App(CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.configure_root()
+        # Members
         self.input_fields = None
         self.row_fields = None
+        self.tabview = None
+        # Setup
         self.build_ui()
         self.init_inputs()
         self.init_row_builder()
@@ -32,43 +35,22 @@ class App(CTk):
     def build_ui(self):
         """Set up the basic UI structure: sidebar with a tabview, input frame, row builder, and preview frame."""
         # Sidebar
-        self.sidebar = CTkFrame(master=self, corner_radius=0)
+        self.sidebar = CTkFrame(master=self, corner_radius=0, fg_color="transparent")
         self.sidebar.grid_rowconfigure(0, weight=1)
         self.sidebar.grid(row=0, column=0, sticky="nsew")  # Sidebar gridding
 
-        # Create a Tabview for the sidebar
-        self.tabview = CTkTabview(
-            master=self.sidebar, fg_color="transparent", width=343
-        )
-        self.tabview.grid(row=0, column=0, sticky="nsew")
+        # TabView
+        self.tabview = TabView(self.sidebar)
+        self.tabview.grid(row=0, column=0, sticky="nsew")  # Add this line to grid it
 
-        # Adding tabs to the tabview
-        self.tabview.add("Array Information")
-        self.tabview.add("Rows")
-        # Configure each tab
-        self.tabview.tab("Array Information").grid_rowconfigure(0, weight=1)
-        self.tabview.tab("Array Information").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Rows").grid_rowconfigure(0, weight=1)
-        self.tabview.tab("Rows").grid_columnconfigure(0, weight=1)
-
-        # Input frame in the first tab
-        self.input_frame = CTkFrame(master=self.tabview.tab("Array Information"))
-        self.input_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
-
-        # Row frame in the second tab
-        self.row_frame = CTkScrollableFrame(
-            master=self.tabview.tab("Rows"), corner_radius=0
-        )
-        self.row_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
-
-        # Refresh button outside the tabview, below it
-        self.calculate_and_preview_button = CTkButton(
+        # Get Results Button
+        self.get_results_button = CTkButton(
             master=self.sidebar,
-            text="Calculate & Preview",
+            text="Get Results",
             corner_radius=0,
             command=self.calculate_and_preview,
         )
-        self.calculate_and_preview_button.grid(row=1, column=0, sticky="ew")
+        self.get_results_button.grid(row=1, column=0, sticky="ew")
 
         # Preview Frame
         self.preview_frame = CTkScrollableFrame(master=self, fg_color="transparent")
@@ -76,19 +58,17 @@ class App(CTk):
 
     def init_inputs(self):
         """Initialize the input fields for panel settings."""
-        self.input_fields = InputFields(self.input_frame)
+        self.input_fields = InputFields(self.tabview.get_input_frame())
         self.input_fields.create_input_widgets()
         # Set default values
         default_inputs = self.input_fields.default_inputs
-        print(default_inputs)
         for key, input_field in self.input_fields.inputs.items():
-            print(key)
             if default_inputs.get(key):
                 input_field.set(default_inputs.get(key))
 
     def init_row_builder(self):
         """Initialize the row builder with add/remove row functionality."""
-        self.row_fields = RowFields(self.row_frame)
+        self.row_fields = RowFields(self.tabview.get_row_frame())
         self.row_fields.init_row_controls()
 
     def calculate_and_preview(self):
@@ -98,8 +78,9 @@ class App(CTk):
             fields_to_check = {
                 "panel_width": float,
                 "panel_height": float,
+                "rafter_spacing": float,
                 "first_bracket_inset": float,
-                "rafter_spacing": int,
+                "rail_protrusion": float,
             }
 
             # Check each field for empty input and ensure it's non-negative
@@ -123,7 +104,7 @@ class App(CTk):
             panel_width = float(self.input_fields.get_input("panel_width"))
             panel_height = float(self.input_fields.get_input("panel_height"))
             inset = float(self.input_fields.get_input("first_bracket_inset"))
-            rafter_spacing = int(self.input_fields.get_input("rafter_spacing"))
+            rafter_spacing = float(self.input_fields.get_input("rafter_spacing"))
 
         except ValueError as e:
             self.tabview.set("Array Information")

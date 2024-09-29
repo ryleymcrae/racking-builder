@@ -1,8 +1,47 @@
 from typing import Any, Dict
 
-from customtkinter import CTkButton, CTkEntry, CTkLabel, CTkOptionMenu
+from customtkinter import (
+    CTkButton,
+    CTkEntry,
+    CTkFrame,
+    CTkLabel,
+    CTkOptionMenu,
+    CTkScrollableFrame,
+    CTkTabview,
+)
 
 from enums import PanelType
+
+
+class TabView(CTkTabview):
+    _tab_names = ["Array Information", "Rows", "Results"]
+
+    def __init__(self, master, width=343):
+        """Initialize the TabView with tabs and associated frames."""
+        super().__init__(master=master, width=width)
+        self.grid(row=0, column=0, sticky="nsew")
+
+        # Configure each tab
+        for tab_name in self._tab_names:
+            self.add(tab_name)
+            self.tab(tab_name).grid_rowconfigure(0, weight=1)
+            self.tab(tab_name).grid_columnconfigure(0, weight=1)
+
+        # Input frame in the first tab
+        self.input_frame = CTkFrame(master=self.tab("Array Information"))
+        self.input_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+
+        # Row frame in the second tab
+        self.row_frame = CTkScrollableFrame(master=self.tab("Rows"), corner_radius=0)
+        self.row_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+
+    def get_input_frame(self):
+        """Return the input frame for external use."""
+        return self.input_frame
+
+    def get_row_frame(self):
+        """Return the row frame for external use."""
+        return self.row_frame
 
 
 class InputFields:
@@ -17,10 +56,12 @@ class InputFields:
             "first_bracket_inset": 10,
             "panel_width": default_panel.width_inches,
             "panel_height": default_panel.height_inches,
+            "rail_protrusion": 4,
         }
 
     def create_input_widgets(self):
         """Creates all input widgets and sets them in the parent frame."""
+        panel_inputs = ["panel_model", "panel_height", "panel_width"]
         self.inputs = {
             "panel_model": InputField(
                 label=CTkLabel(self.parent, text="Panel Model"),
@@ -31,13 +72,13 @@ class InputFields:
                 ),
                 units_label=None,
             ),
-            "panel_height": InputField(
-                label=CTkLabel(self.parent, text="Panel Height"),
+            "panel_width": InputField(
+                label=CTkLabel(self.parent, text="Panel Width"),
                 input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
             ),
-            "panel_width": InputField(
-                label=CTkLabel(self.parent, text="Panel Width"),
+            "panel_height": InputField(
+                label=CTkLabel(self.parent, text="Panel Height"),
                 input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
             ),
@@ -48,23 +89,37 @@ class InputFields:
                 ),
                 units_label=None,
             ),
+            "rafter_spacing": InputField(
+                label=CTkLabel(self.parent, text="Rafter Spacing"),
+                input_widget=CTkOptionMenu(
+                    self.parent, values=["12", "18", "19.1875", "24", "32", "48"]
+                ),
+                units_label=CTkLabel(self.parent, text="Inches"),
+            ),
             "first_bracket_inset": InputField(
                 label=CTkLabel(self.parent, text="First Bracket Inset"),
                 input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
             ),
-            "rafter_spacing": InputField(
-                label=CTkLabel(self.parent, text="Rafter Spacing"),
-                input_widget=CTkOptionMenu(
-                    self.parent, values=["12", "18", "24", "32", "48"]
-                ),
+            "rail_protrusion": InputField(
+                label=CTkLabel(self.parent, text="Rail Protrusion"),
+                input_widget=CTkEntry(self.parent),
                 units_label=CTkLabel(self.parent, text="Inches"),
             ),
         }
 
-        # Place all input fields
+        # Place all input fields with a spacer between panel inputs and other inputs
+        spacer_placed = False
         for idx, (key, field) in enumerate(self.inputs.items()):
-            field.grid(row=idx)
+            if key in panel_inputs:
+                field.grid(row=idx)
+            else:
+                if not spacer_placed:
+                    CTkFrame(self.parent, height=2).grid(
+                        row=idx, columnspan=3, padx=8, pady=4, sticky="ew"
+                    )
+                    spacer_placed = True
+                field.grid(row=idx + 1)
 
     def set_panel_dimensions(self, panel_model: str):
         """Set the dimensions of the panel based on the selected model."""
