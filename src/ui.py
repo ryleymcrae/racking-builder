@@ -16,7 +16,7 @@ class InputFields:
         return {
             "first_bracket_inset": 10,
             "panel_width": default_panel.width_inches,
-            "panel_height": default_panel.height_inches
+            "panel_height": default_panel.height_inches,
         }
 
     def create_input_widgets(self):

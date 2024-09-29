@@ -99,7 +99,7 @@ class App(CTk):
                 "panel_width": float,
                 "panel_height": float,
                 "first_bracket_inset": float,
-                "rafter_spacing": int
+                "rafter_spacing": int,
             }
 
             # Check each field for empty input and ensure it's non-negative
@@ -108,29 +108,33 @@ class App(CTk):
 
                 # Check if the input is empty
                 if value == "":
-                    raise ValueError(f"{field_name.replace('_', ' ').capitalize()} cannot be empty.")
+                    raise ValueError(
+                        f"{field_name.replace('_', ' ').capitalize()} cannot be empty."
+                    )
 
                 # Parse the input to the correct type (float/int) and check if it's negative
                 numeric_value = cast_type(value)
                 if numeric_value < 0:
-                    raise ValueError(f"{field_name.replace('_', ' ').capitalize()} cannot be negative.")
+                    raise ValueError(
+                        f"{field_name.replace('_', ' ').capitalize()} cannot be negative."
+                    )
 
             # All inputs are valid, continue with the rest of the logic
             panel_width = float(self.input_fields.get_input("panel_width"))
             panel_height = float(self.input_fields.get_input("panel_height"))
             inset = float(self.input_fields.get_input("first_bracket_inset"))
             rafter_spacing = int(self.input_fields.get_input("rafter_spacing"))
-            
+
         except ValueError as e:
             self.tabview.set("Array Information")
             return self.show_warning_dialog(str(e))
-        
+
         try:
             row_data = self.row_fields.get_row_data()
         except ValueError as e:
             self.tabview.set("Rows")
             return self.show_warning_dialog(str(e))
-            
+
         update_preview_frame(self.preview_frame, row_data, panel_width, panel_height)
 
     def show_warning_dialog(self, message):
