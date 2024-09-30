@@ -1,7 +1,8 @@
-from typing import Any, Dict
+from typing import Dict, List
 
 from customtkinter import (
     CTkButton,
+    CTkCheckBox,
     CTkEntry,
     CTkFrame,
     CTkLabel,
@@ -16,9 +17,9 @@ from enums import PanelType
 class TabView(CTkTabview):
     _tab_names = ["Array Information", "Rows", "Results"]
 
-    def __init__(self, master, width=343):
+    def __init__(self, master, width=341, fg_color="transparent"):
         """Initialize the TabView with tabs and associated frames."""
-        super().__init__(master=master, width=width)
+        super().__init__(master=master, width=width, fg_color=fg_color)
         self.grid(row=0, column=0, sticky="nsew")
 
         # Configure each tab
@@ -35,6 +36,8 @@ class TabView(CTkTabview):
         self.row_frame = CTkScrollableFrame(master=self.tab("Rows"), corner_radius=0)
         self.row_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
 
+        CTkLabel(self.tab("Results"), text="Nothing to show yet.").pack(pady=(10, 0))
+
     def get_input_frame(self):
         """Return the input frame for external use."""
         return self.input_frame
@@ -45,20 +48,38 @@ class TabView(CTkTabview):
 
 
 class InputFields:
+    _field_types = {
+        "panel_model": str,
+        "panel_width": float,
+        "panel_height": float,
+        "pattern": str,
+        "rafter_spacing": float,
+        "panel_spacing": float,
+        "first_bracket_inset": float,
+        "rail_protrusion": float,
+    }
+    _default_inputs = {
+        "panel_model": list(PanelType)[0].name,
+        "panel_width": list(PanelType)[0].width_inches,
+        "panel_height": list(PanelType)[0].height_inches,
+        "pattern": "Continuous",
+        "rafter_spacing": "24",
+        "panel_spacing": 0.625,
+        "first_bracket_inset": 10,
+        "rail_protrusion": 4,
+    }
+
     def __init__(self, parent):
         self.parent = parent
         self.inputs: Dict[str, InputField] = {}
 
     @property
+    def fields_types(self):
+        return self._field_types
+
+    @property
     def default_inputs(self):
-        default_panel = list(PanelType)[0]  # Get the first item in the enum
-        return {
-            "first_bracket_inset": 10,
-            "panel_width": default_panel.width_inches,
-            "panel_height": default_panel.height_inches,
-            "panel_spacing": 0.625,
-            "rail_protrusion": 4,
-        }
+        return self._default_inputs
 
     def create_input_widgets(self):
         """Creates all input widgets and sets them in the parent frame."""
@@ -76,12 +97,14 @@ class InputFields:
             "panel_width": InputField(
                 label=CTkLabel(self.parent, text="Panel Width"),
                 input_widget=CTkEntry(self.parent),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
+                valid_range=(25, 60),
             ),
             "panel_height": InputField(
                 label=CTkLabel(self.parent, text="Panel Height"),
                 input_widget=CTkEntry(self.parent),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
+                valid_range=(50, 100),
             ),
             "pattern": InputField(
                 label=CTkLabel(self.parent, text="Mounting Pattern"),
@@ -95,37 +118,45 @@ class InputFields:
                 input_widget=CTkOptionMenu(
                     self.parent, values=["12", "16", "19.1875", "24", "32", "48"]
                 ),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
             ),
             "panel_spacing": InputField(
                 label=CTkLabel(self.parent, text="Panel Spacing"),
                 input_widget=CTkEntry(self.parent),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
+                valid_range=(0.39, 0.7),
             ),
             "first_bracket_inset": InputField(
                 label=CTkLabel(self.parent, text="First Bracket Inset"),
                 input_widget=CTkEntry(self.parent),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
+                valid_range=(4, 20),
             ),
             "rail_protrusion": InputField(
                 label=CTkLabel(self.parent, text="Rail Protrusion"),
                 input_widget=CTkEntry(self.parent),
-                units_label=CTkLabel(self.parent, text="Inches"),
+                units_label=CTkLabel(self.parent, text="in."),
+                valid_range=(2, 4),
             ),
         }
 
         # Place all input fields with a spacer between panel inputs and other inputs
         spacer_placed = False
+        label = CTkLabel(self.parent, text="Panel Specifications")
+        label.grid(row=0, columnspan=3)
         for idx, (key, field) in enumerate(self.inputs.items()):
             if key in panel_inputs:
-                field.grid(row=idx)
+                field.grid(row=idx + 1)
             else:
                 if not spacer_placed:
                     CTkFrame(self.parent, height=2).grid(
-                        row=idx, columnspan=3, padx=8, pady=4, sticky="ew"
+                        row=idx + 1, columnspan=3, padx=8, pady=4, sticky="ew"
+                    )
+                    CTkLabel(self.parent, text="Racking Specifications").grid(
+                        row=idx + 2, columnspan=3
                     )
                     spacer_placed = True
-                field.grid(row=idx + 1)
+                field.grid(row=idx + 3)
 
     def set_panel_dimensions(self, panel_model: str):
         """Set the dimensions of the panel based on the selected model."""
@@ -137,12 +168,23 @@ class InputFields:
         """Get the value of a specific input field."""
         return self.inputs[field_name].get()
 
+    def get_input_valid_range(self, field_name: str):
+        """Get the value of a specific input field."""
+        return self.inputs[field_name].get_valid_range()
+
 
 class InputField:
-    def __init__(self, label, input_widget: CTkEntry | CTkOptionMenu, units_label=None):
+    def __init__(
+        self,
+        label,
+        input_widget: CTkEntry | CTkOptionMenu,
+        units_label=None,
+        valid_range=None,
+    ):
         self.label = label
         self.input_widget = input_widget
         self.units_label = units_label
+        self.valid_range = valid_range
 
     def grid(self, row):
         self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
@@ -152,6 +194,9 @@ class InputField:
 
     def get(self):
         return self.input_widget.get()
+
+    def get_valid_range(self):
+        return self.valid_range
 
     def set(self, new_value, notify=False, parent=None) -> None:
         from customtkinter import ThemeManager
@@ -171,6 +216,38 @@ class InputField:
                     border_color=ThemeManager.theme["CTkEntry"]["border_color"]
                 ),
             )
+
+
+# class RailLengths(list):
+#     _rail_lengths = [138, 140, 180, 185]
+
+#     def __init__(self, parent):
+#         self.extend(
+#             CTkCheckBox(
+#                 parent,
+#                 text=f"{rail_length} in.",
+#                 checkbox_height=18,
+#                 checkbox_width=18,
+#             )
+#             for rail_length in self._rail_lengths
+#         )
+
+#     def get(self):
+#         """Return a list of selected rail lengths."""
+#         selected_lengths = [
+#             rail_length
+#             for rail_length, checkbox in zip(self._rail_lengths, self)
+#             if checkbox.get()  # Assuming the get method of CTkCheckBox returns a boolean
+#         ]
+#         return selected_lengths
+
+#     def set(self, lengths):
+#         """Set the checkboxes corresponding to the provided list of rail lengths."""
+#         for rail_length, checkbox in zip(self._rail_lengths, self):
+#             if rail_length in lengths:
+#                 checkbox.select()  # Select the checkbox if the rail length is in the list
+#             else:
+#                 checkbox.deselect()  # Deselect otherwise
 
 
 class RowFields:
@@ -224,13 +301,4 @@ class RowField:
         self.orientation.grid_forget()
 
     def get(self):
-        try:
-            num_panels = int(self.entry.get())
-            if num_panels < 1 or num_panels > 100:
-                raise ValueError
-            orientation = self.orientation.get()
-            return num_panels, orientation
-        except ValueError:
-            raise ValueError(
-                "An entry for a number of panels is invalid. Please ensure the values are all non-empty integers between 1 and 100"
-            )
+        return (self.entry.get(), self.orientation.get())

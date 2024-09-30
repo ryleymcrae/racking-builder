@@ -1,9 +1,13 @@
 from customtkinter import LEFT, CTkFrame
 
 
-def update_preview_frame(preview_frame, row_data, panel_width, panel_height):
+def update_preview_frame(preview_frame, row_data, user_inputs):
     """Update the preview based on row data."""
     max_length = 0
+    panel_width, panel_height = (
+        user_inputs["panel_width"],
+        user_inputs["panel_height"],
+    )
 
     for _, (num_panels, orientation) in enumerate(row_data):
         if orientation == "Landscape":
@@ -42,3 +46,7 @@ def update_preview_frame(preview_frame, row_data, panel_width, panel_height):
                 corner_radius=0,
                 border_width=1,
             ).pack(side=LEFT, pady=(0, 2))
+
+
+def update_results(results_frame, equipment_data, psi_data):
+    pass
