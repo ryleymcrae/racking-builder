@@ -23,27 +23,6 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     num_splices_total = 0
     row_lengths = {}
 
-    def split_rows(row_data):
-        updated_rows = []  # List to store the updated rows
-
-        for panels, orientation in row_data:
-            if orientation == "Portrait":
-                while panels > 15:
-                    updated_rows.append((16, orientation))  # Add a 16 panel row
-                    panels -= 15  # Reduce the number of panels
-            elif orientation == "Landscape":
-                while panels > 7:
-                    updated_rows.append((8, orientation))  # Add an 8 panel row
-                    panels -= 7  # Reduce the number of panels
-
-            # If there are remaining panels, add them back to the list
-            if panels > 0:
-                updated_rows.append((panels, orientation))
-
-        return updated_rows
-
-    _split_rows = split_rows(row_data)
-
     panel_width = user_inputs["panel_width"]
     panel_height = user_inputs["panel_height"]
     panel_spacing = user_inputs["panel_spacing"]
@@ -52,7 +31,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     pattern = user_inputs["pattern"]
     first_bracket_inset = user_inputs["first_bracket_inset"]
 
-    for i, (num_panels, orientation) in enumerate(_split_rows):
+    for i, (num_panels, orientation) in enumerate(row_data):
         num_panels_total += num_panels
         num_ends += 4
         num_mids += 2 * (num_panels - 1)
@@ -116,7 +95,6 @@ def get_rail_requirements_for_panels(num_panels, orientation):
         13: (1, 6, 6),
         14: (0, 7, 6),
         15: (2, 6, 6),
-        16: (0, 8, 6),
     }
     landscape_lookup = {
         1: (0, 1, 0),
@@ -126,13 +104,29 @@ def get_rail_requirements_for_panels(num_panels, orientation):
         5: (0, 5, 4),
         6: (2, 4, 4),
         7: (1, 6, 6),
-        8: (2, 6, 6),
     }
-
-    if orientation == "Portrait":
-        return portrait_lookup[num_panels]
-    else:
-        return landscape_lookup[num_panels]
+    
+    # Recursive function to handle splits for panels over the maximum allowed
+    def recursive_split(num_panels, orientation):
+        if orientation == "Portrait":
+            max_panels = 15
+            lookup = portrait_lookup
+        else:
+            max_panels = 7
+            lookup = landscape_lookup
+        
+        if num_panels <= max_panels:
+            return lookup[num_panels]
+        else:
+            # Get the result for the max panels allowed
+            current_result = lookup[max_panels]
+            # Recursively call for the remaining panels
+            remaining_result = recursive_split(num_panels - max_panels, orientation)
+            
+            # Sum the results index by index
+            return tuple(a + b for a, b in zip(current_result, remaining_result))
+    
+    return recursive_split(num_panels, orientation)
 
 
 def get_psi_data(row_data):
