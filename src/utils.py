@@ -21,19 +21,20 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     num_mids = 0
     num_ends = 0
     num_splices_total = 0
+    row_lengths = {}
 
     def split_rows(row_data):
         updated_rows = []  # List to store the updated rows
 
         for panels, orientation in row_data:
             if orientation == "Portrait":
-                while panels > 16:
+                while panels > 15:
                     updated_rows.append((16, orientation))  # Add a 16 panel row
-                    panels -= 16  # Reduce the number of panels
+                    panels -= 15  # Reduce the number of panels
             elif orientation == "Landscape":
-                while panels > 8:
+                while panels > 7:
                     updated_rows.append((8, orientation))  # Add an 8 panel row
-                    panels -= 8  # Reduce the number of panels
+                    panels -= 7  # Reduce the number of panels
 
             # If there are remaining panels, add them back to the list
             if panels > 0:
@@ -41,7 +42,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
 
         return updated_rows
 
-    row_data = split_rows(row_data)
+    _split_rows = split_rows(row_data)
 
     panel_width = user_inputs["panel_width"]
     panel_height = user_inputs["panel_height"]
@@ -51,7 +52,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     pattern = user_inputs["pattern"]
     first_bracket_inset = user_inputs["first_bracket_inset"]
 
-    for num_panels, orientation in row_data:
+    for i, (num_panels, orientation) in enumerate(_split_rows):
         num_panels_total += num_panels
         num_ends += 4
         num_mids += 2 * (num_panels - 1)
@@ -61,7 +62,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         else:
             row_length = num_panels * panel_width + (num_panels - 1) * panel_spacing
 
-        rail_length = round(row_length + 2 * rail_protrusion, 4)
+        rail_length = row_length + 2 * rail_protrusion, 4
         mount_spacing = (48 // rafter_spacing) * rafter_spacing
 
         if pattern == "Continuous":
@@ -84,14 +85,16 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         num_splices_total += num_splices
         num_rails[140] += num_140
         num_rails[185] += num_185
+        row_lengths[i] = round(row_length, 4)
 
     equipment = {
         "num_modules": num_panels_total,
         "num_rails": num_rails,
-        "num_mounts": num_mounts,
+        "num_mounts": int(num_mounts),
         "num_mids": num_mids,
         "num_ends": num_ends,
         "num_splices": num_splices_total,
+        "row_lengths": row_lengths,
     }
     return equipment
 

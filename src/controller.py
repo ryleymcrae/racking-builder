@@ -1,4 +1,4 @@
-from customtkinter import LEFT, CTkFrame
+from customtkinter import LEFT, CTkFrame, CTkLabel, CTkScrollableFrame
 
 
 def update_preview_frame(preview_frame, row_data, user_inputs):
@@ -48,5 +48,57 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             ).pack(side=LEFT, pady=(0, 2))
 
 
-def update_results(results_frame, equipment_data, psi_data):
-    pass
+def update_results(results_frame, equipment_data, psi_data=None):
+    for child in results_frame.winfo_children():
+        child.destroy()
+
+    row = 0
+
+    hardware_label = CTkLabel(results_frame, text="Equipment")
+    hardware_label.grid(row=row, columnspan=2)
+    CTkFrame(results_frame, height=2).grid(
+        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
+    )
+    row += 2
+
+    for i, result_label in enumerate(
+        [
+            "num_modules",
+            "num_mounts",
+            "num_mids",
+            "num_ends",
+            "num_splices",
+        ]
+    ):
+        label = CTkLabel(results_frame, text=result_label.split("_")[1].capitalize())
+        label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
+        value_label = CTkLabel(results_frame, text=f"{equipment_data[result_label]}")
+        value_label.grid(row=row, column=1, padx=8, pady=4, sticky="e")
+        row += 1
+
+    for rail_length, count in equipment_data["num_rails"].items():
+        label = CTkLabel(results_frame, text=f'{rail_length}" Rail')
+        label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
+        value_label = CTkLabel(results_frame, text=str(count))
+        value_label.grid(row=row, column=1, padx=8, pady=4, sticky="e")
+        row += 1
+
+    row_lengths_label = CTkLabel(results_frame, text="Row Lengths")
+    row_lengths_label.grid(row=row, columnspan=2, pady=(6, 0))
+    CTkFrame(results_frame, height=2).grid(
+        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
+    )
+    row += 2
+
+    row_lengths_frame = (
+        CTkScrollableFrame(results_frame, fg_color="transparent")
+        if len(equipment_data["row_lengths"]) > 6
+        else CTkFrame(results_frame, fg_color="transparent")
+    )
+    row_lengths_frame.grid(row=row, column=0, columnspan=2, sticky="nsew")
+    row_lengths_frame.grid_columnconfigure(1, weight=1)
+    for row_num, length in equipment_data["row_lengths"].items():
+        label = CTkLabel(row_lengths_frame, text=f"Row {row_num+1}")
+        label.grid(row=row_num, column=0, padx=8, pady=4, sticky="w")
+        value_label = CTkLabel(row_lengths_frame, text=f'{length}"')
+        value_label.grid(row=row_num, column=1, padx=8, pady=4, sticky="e")

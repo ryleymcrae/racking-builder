@@ -24,6 +24,7 @@ class App(CTk):
         self.init_inputs()
         self.set_default_inputs()
         self.init_row_builder()
+        self.after(250, lambda: print(self.sidebar.winfo_width()))
 
     def configure_root(self):
         """Configure root window properties."""
@@ -126,9 +127,10 @@ class App(CTk):
             self.tabview.set("Array Information")
             return self.show_warning_dialog("Invalid Array Input", str(e))
 
-        row_data = self.row_fields.get_row_data()
+        user_row_data = self.row_fields.get_row_data()
+        row_data = []
         try:
-            for id, (num_panels, orientation) in enumerate(row_data):
+            for id, (num_panels, orientation) in enumerate(user_row_data):
                 if num_panels == "":
                     raise ValueError(f"The value in row {id + 1} cannot be empty.")
                 n = int(num_panels)
@@ -137,7 +139,6 @@ class App(CTk):
                         f"The value in row {id + 1} is outside the valid range of [1, 100]"
                     )
                 else:
-                    row_data.pop(0)
                     row_data.append((n, orientation))
         except ValueError as e:
             self.tabview.set("Rows")
@@ -145,9 +146,10 @@ class App(CTk):
 
         update_preview_frame(self.preview_frame, row_data, user_inputs)
 
-        print(get_equipment_data(row_data, user_inputs))
+        equipment_data = get_equipment_data(row_data, user_inputs)
 
-        # update_results(row_data, equipment_data, psi_data)
+        update_results(self.tabview.get_results_frame(), equipment_data)
+        self.tabview.set("Results")
 
     def show_warning_dialog(self, title, message):
         messagebox.showwarning(title, message)

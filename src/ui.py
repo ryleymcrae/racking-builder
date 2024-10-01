@@ -17,7 +17,7 @@ from enums import PanelType
 class TabView(CTkTabview):
     _tab_names = ["Array Information", "Rows", "Results"]
 
-    def __init__(self, master, width=341, fg_color="transparent"):
+    def __init__(self, master, width=325, fg_color="transparent"):
         """Initialize the TabView with tabs and associated frames."""
         super().__init__(master=master, width=width, fg_color=fg_color)
         self.grid(row=0, column=0, sticky="nsew")
@@ -36,7 +36,12 @@ class TabView(CTkTabview):
         self.row_frame = CTkScrollableFrame(master=self.tab("Rows"), corner_radius=0)
         self.row_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
 
-        CTkLabel(self.tab("Results"), text="Nothing to show yet.").pack(pady=(10, 0))
+        self.results_frame = CTkFrame(master=self.tab("Results"))
+        self.results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+        self.results_frame.grid_rowconfigure(11, weight=1)
+        self.results_frame.grid_columnconfigure(1, weight=1)
+
+        CTkLabel(self.results_frame, text="Nothing to show yet.").pack(pady=(10, 0))
 
     def get_input_frame(self):
         """Return the input frame for external use."""
@@ -45,6 +50,10 @@ class TabView(CTkTabview):
     def get_row_frame(self):
         """Return the row frame for external use."""
         return self.row_frame
+
+    def get_results_frame(self):
+        """Return the results frame for external use."""
+        return self.results_frame
 
 
 class InputFields:
@@ -216,38 +225,6 @@ class InputField:
                     border_color=ThemeManager.theme["CTkEntry"]["border_color"]
                 ),
             )
-
-
-# class RailLengths(list):
-#     _rail_lengths = [138, 140, 180, 185]
-
-#     def __init__(self, parent):
-#         self.extend(
-#             CTkCheckBox(
-#                 parent,
-#                 text=f"{rail_length} in.",
-#                 checkbox_height=18,
-#                 checkbox_width=18,
-#             )
-#             for rail_length in self._rail_lengths
-#         )
-
-#     def get(self):
-#         """Return a list of selected rail lengths."""
-#         selected_lengths = [
-#             rail_length
-#             for rail_length, checkbox in zip(self._rail_lengths, self)
-#             if checkbox.get()  # Assuming the get method of CTkCheckBox returns a boolean
-#         ]
-#         return selected_lengths
-
-#     def set(self, lengths):
-#         """Set the checkboxes corresponding to the provided list of rail lengths."""
-#         for rail_length, checkbox in zip(self._rail_lengths, self):
-#             if rail_length in lengths:
-#                 checkbox.select()  # Select the checkbox if the rail length is in the list
-#             else:
-#                 checkbox.deselect()  # Deselect otherwise
 
 
 class RowFields:
