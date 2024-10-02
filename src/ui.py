@@ -38,7 +38,6 @@ class TabView(CTkTabview):
 
         self.results_frame = CTkFrame(master=self.tab("Results"))
         self.results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
-        self.results_frame.grid_rowconfigure(11, weight=1)
         self.results_frame.grid_columnconfigure(1, weight=1)
 
         CTkLabel(self.results_frame, text="Nothing to show yet.").pack(pady=(10, 0))

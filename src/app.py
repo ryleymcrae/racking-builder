@@ -24,7 +24,7 @@ class App(CTk):
         self.init_inputs()
         self.set_default_inputs()
         self.init_row_builder()
-        self.after(250, lambda: print(self.sidebar.winfo_width()))
+        # self.after(250, lambda: print(self.sidebar.winfo_width()))
 
     def configure_root(self):
         """Configure root window properties."""
@@ -78,7 +78,7 @@ class App(CTk):
         if ask:
             if not messagebox.askyesno(
                 title="Overwrite Inputs",
-                message="Do you want to overwrite your current inputs with the default values? This action cannot be undone.",
+                message="Do you want to overwrite all inputs to their default values?",
             ):
                 return
         default_inputs = self.input_fields.default_inputs
@@ -102,7 +102,7 @@ class App(CTk):
                 # Check if the input is empty
                 if value == "":
                     raise ValueError(
-                        f"'{' '.join(word.capitalize() for word in field_name.split('_'))}' cannot be empty."
+                        f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is empty."
                     )
 
                 # Cast the value according to its type
@@ -118,7 +118,7 @@ class App(CTk):
                     numeric_value < valid_range[0] or numeric_value > valid_range[1]
                 ):
                     raise ValueError(
-                        f"'{' '.join(word.capitalize() for word in field_name.split('_'))}' value is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
+                        f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
                     )
 
                 user_inputs[field_name] = numeric_value
@@ -132,7 +132,7 @@ class App(CTk):
         try:
             for id, (num_panels, orientation) in enumerate(user_row_data):
                 if num_panels == "":
-                    raise ValueError(f"The value in row {id + 1} cannot be empty.")
+                    raise ValueError(f"The value in row {id + 1} is empty.")
                 n = int(num_panels)
                 if n < 1 or n > 100:
                     raise ValueError(
