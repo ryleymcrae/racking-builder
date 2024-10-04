@@ -3,8 +3,8 @@ from tkinter import messagebox
 from customtkinter import CTk, CTkButton, CTkFrame, CTkScrollableFrame
 
 from controller import update_preview_frame, update_results
-from ui import InputFields, RowFields, TabView
-from utils import get_equipment_data, get_icon_path, get_psi_data
+from ui import PanelFields, RackingFields, RowFields, TabView
+from utils import *
 
 
 class App(CTk):
@@ -70,9 +70,16 @@ class App(CTk):
         self.preview_frame.grid(row=0, column=1, sticky="nsew")
 
     def init_inputs(self):
-        """Initialize the input fields for panel settings."""
-        self.input_fields = InputFields(self.tabview.get_input_frame())
-        self.input_fields.create_input_widgets()
+        """Initialize the input fields for panel and racking settings."""
+        # Panel Fields
+        self.panel_fields = PanelFields(self.tabview.get_input_frame())
+        self.panel_fields.create_input_widgets()
+
+        # Racking Fields (Below the panel fields)
+        self.racking_fields = RackingFields(self.tabview.get_input_frame())
+        self.racking_fields.create_input_widgets(
+            starting_row=len(self.panel_fields.inputs) + 3
+        )
 
     def set_default_inputs(self, ask=False):
         if ask:
@@ -81,10 +88,9 @@ class App(CTk):
                 message="Do you want to overwrite all inputs to their default values?",
             ):
                 return
-        default_inputs = self.input_fields.default_inputs
-        for key, input_field in self.input_fields.inputs.items():
-            if default_inputs.get(key):
-                input_field.set(default_inputs.get(key))
+
+        self.panel_fields.restore_default_values()
+        self.racking_fields.restore_default_values()
 
     def init_row_builder(self):
         """Initialize the row builder with add/remove row functionality."""
@@ -92,36 +98,13 @@ class App(CTk):
         self.row_fields.init_row_controls()
 
     def calculate_and_preview(self):
-        """Needs summary"""
+        """Collect inputs and calculate the results."""
         try:
             user_inputs = {}
-            # Check each field for empty input and ensure it's non-negative
-            for field_name, cast_type in self.input_fields.fields_types.items():
-                value = self.input_fields.get_input(field_name).strip()
 
-                # Check if the input is empty
-                if value == "":
-                    raise ValueError(
-                        f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is empty."
-                    )
-
-                # Cast the value according to its type
-                if cast_type is str:
-                    numeric_value = value  # Keep it as a string if cast_type is str
-                else:
-                    numeric_value = cast_type(value)
-
-                # Check for valid range if applicable
-                valid_range = self.input_fields.get_input_valid_range(field_name)
-
-                if valid_range is not None and (
-                    numeric_value < valid_range[0] or numeric_value > valid_range[1]
-                ):
-                    raise ValueError(
-                        f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
-                    )
-
-                user_inputs[field_name] = numeric_value
+            # Process inputs for both panel and racking fields
+            user_inputs.update(process_fields(self.panel_fields))
+            user_inputs.update(process_fields(self.racking_fields))
 
         except ValueError as e:
             self.tabview.set("Array Information")
