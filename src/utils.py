@@ -1,5 +1,6 @@
 import os
 import sys
+from enum import Enum
 from typing import List, Tuple
 
 
@@ -10,6 +11,39 @@ def get_icon_path():
         return os.path.join(application_path, "icon.ico")
     else:
         return "icon.ico"
+
+
+def process_fields(fields):
+    """Helper method to process input fields."""
+    user_inputs = {}
+    for field_name in fields.inputs.keys():
+        value = fields.get_input(field_name).strip()
+
+        # Check if the input is empty
+        if value == "":
+            raise ValueError(
+                f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is empty."
+            )
+
+        # Cast the value according to its type
+        variable_type = fields.get_input_variable_type(field_name)
+        if issubclass(variable_type, Enum):
+            numeric_value = variable_type.map()[value]  # Use enum mapping
+        else:
+            numeric_value = variable_type(value)
+
+        # Check for valid range if applicable
+        valid_range = fields.get_input_valid_range(field_name)
+        if valid_range is not None and (
+            numeric_value < valid_range[0] or numeric_value > valid_range[1]
+        ):
+            raise ValueError(
+                f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
+            )
+
+        user_inputs[field_name] = numeric_value
+
+    return user_inputs
 
 
 def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
@@ -30,7 +64,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     panel_height = user_inputs["panel_height"]
     panel_spacing = user_inputs["panel_spacing"]
     rail_protrusion = user_inputs["rail_protrusion"]
-    rafter_spacing = user_inputs["rafter_spacing"]
+    rafter_spacing = float(str(user_inputs["rafter_spacing"]))
     pattern = user_inputs["pattern"]
     first_bracket_inset = user_inputs["first_bracket_inset"]
 
@@ -79,7 +113,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         "num_mids": num_mids,
         "num_ends": num_ends,
         "num_splices": num_splices_total,
-        "total_waste": f'{round(total_waste)}"',
+        "total_waste": f'{round(total_waste, 2)}"',
         "row_lengths": row_lengths,
         "all_rails": all_rails,
         "all_wastes": all_wastes,
@@ -131,19 +165,14 @@ def optimal_rail_selection(rail_length):
 
     # Try all combinations and compute the waste for both rows
     for combo in generate_combinations():
-        top_waste = calculate_waste(combo, rail_length)
+        waste = calculate_waste(combo, rail_length)
 
-        if top_waste != float("inf"):  # Check if the combination works for the top row
-            # Use the top row cutoff for the bottom row, so no additional waste
-            bottom_waste = top_waste  # Since the pattern must be identical
-
-            # Calculate the total waste and the number of splices
-            total_waste = top_waste + bottom_waste
+        if waste != float("inf"):  # Check if the combination works for the top row
             splices = calculate_splices(combo)
 
             # If this configuration has less waste, update the best combination
-            if total_waste < least_waste:
-                least_waste = total_waste
+            if waste < least_waste:
+                least_waste = waste
                 best_combination = combo
                 best_splices = splices
 
