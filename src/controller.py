@@ -57,7 +57,7 @@ def update_results(results_frame, equipment_data, psi_data=None):
     hardware_label = CTkLabel(results_frame, text="Equipment")
     hardware_label.grid(row=row, columnspan=2)
     CTkFrame(results_frame, height=2).grid(
-        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
+        row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
     )
     row += 2
 
@@ -72,29 +72,29 @@ def update_results(results_frame, equipment_data, psi_data=None):
         }.items()
     ):
         label = CTkLabel(results_frame, text=key.split("_")[1].capitalize())
-        label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
+        label.grid(row=row, column=0, padx=8, sticky="w")
         value_label = CTkLabel(results_frame, text=f"{equipment_data[key]}")
-        value_label.grid(row=row, column=1, padx=8, pady=4, sticky="e")
+        value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
     for rail_length, count in equipment_data["num_rails"].items():
         label = CTkLabel(results_frame, text=f'{rail_length}" Rail')
-        label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
+        label.grid(row=row, column=0, padx=8, sticky="w")
         value_label = CTkLabel(results_frame, text=str(count))
-        value_label.grid(row=row, column=1, padx=8, pady=4, sticky="e")
+        value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
     row_lengths_label = CTkLabel(results_frame, text="Row Lengths")
-    row_lengths_label.grid(row=row, columnspan=2, pady=(6, 0))
+    row_lengths_label.grid(row=row, columnspan=2, pady=(16, 0))
     CTkFrame(results_frame, height=2).grid(
-        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
+        row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
     )
     row += 2
 
     results_frame.grid_rowconfigure(row, weight=1)
     row_lengths_frame = (
         CTkScrollableFrame(results_frame, fg_color="transparent")
-        if len(equipment_data["row_lengths"]) > 4
+        if len(equipment_data["row_lengths"]) > 5
         else CTkFrame(results_frame, fg_color="transparent")
     )
     row_lengths_frame.grid(row=row, column=0, columnspan=2, sticky="nsew")
@@ -107,22 +107,22 @@ def update_results(results_frame, equipment_data, psi_data=None):
         label = CTkLabel(
             row_lengths_frame, text=f"Row {i+1}", font=("TkDefaultFont", 12, "bold")
         )
-        label.grid(row=i * 2, column=0, padx=8, pady=(4, 0), sticky="w")
+        label.grid(row=i * 2, column=0, padx=8, sticky="w")
         value_label = CTkLabel(row_lengths_frame, text=f'{length}"')
-        value_label.grid(row=i * 2, column=1, padx=8, pady=(4, 0), sticky="e")
+        value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
         rails_label = CTkLabel(
             row_lengths_frame,
             text=f'140": {all_rails[i][0]}\t185": {all_rails[i][1]}',
             anchor="w",
-            font=("TkDefaultFont", 11),
+            font=("TkDefaultFont", 10),
             height=20,
         )
         rails_label.grid(row=i * 2 + 1, column=0, padx=8, pady=(0, 4), sticky="w")
-        rails_label = CTkLabel(
+        waste_label = CTkLabel(
             row_lengths_frame,
             text=f'Waste: {all_wastes[i]}"',
             anchor="e",
-            font=("TkDefaultFont", 11),
+            font=("TkDefaultFont", 10),
             height=20,
         )
-        rails_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
+        waste_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
