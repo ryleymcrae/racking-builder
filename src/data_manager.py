@@ -33,7 +33,9 @@ class DataManager:
             return load(f)
 
     def save_data(self):
-        """Save data to JSON."""
+        """Save sorted data to JSON."""
+        self.data["panel_models"].sort(key=lambda x: x["name"])
+        self.data["rails"].sort(key=lambda x: int(x))
         with open(self.file_path, 'w') as f:
             dump(self.data, f, indent=4)
 

@@ -121,7 +121,7 @@ def update_results(results_frame, equipment_data, psi_data=None):
         value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
         rails_label = CTkLabel(
             row_lengths_frame,
-            text=f'140": {all_rails[i][0]}\t185": {all_rails[i][1]}',
+            text=" ".join([f'{length}": {count}' for length, count in all_rails[i].items()]),
             anchor="w",
             font=("TkDefaultFont", 10),
             height=20,
@@ -176,7 +176,7 @@ def edit_data(preview_frame, load_panel_models):
         # Convert rail lengths to floats
         for i in range(len(data_manager.data["rails"])):
             try:
-                data_manager.data["rails"][i] = float(data_manager.data["rails"][i])
+                data_manager.data["rails"][i] = int(data_manager.data["rails"][i])
             except ValueError:
                 return messagebox.showwarning(
                     "Invalid Row Length",
