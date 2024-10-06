@@ -135,14 +135,16 @@ def optimal_rail_selection(rail_length, available_rails):
     least_waste = float("inf")  # Start with a large value for least waste
     best_splices = 0  # To store the number of splices for the best combination
     rail_length *= 2  # Multiply by 2 for both rows
-    
+
     # Helper function to calculate splices
     def calculate_splices(rail_combo):
         n = len(rail_combo)
         if n < 3:
             return 0
         else:
-            return ((n - 1) // 2) * 2  # Add 2 splices for every two rails after the first
+            return (
+                (n - 1) // 2
+            ) * 2  # Add 2 splices for every two rails after the first
 
     # Function to calculate the rail waste for a given pattern
     def calculate_waste(rails, length_needed):
@@ -153,7 +155,7 @@ def optimal_rail_selection(rail_length, available_rails):
     # Generate combinations of available rails
     def generate_combinations():
         combinations = []
-        for i in range(1, int(rail_length // min(available_rails)) + 3): 
+        for i in range(1, int(rail_length // min(available_rails)) + 3):
             for combo in combinations_with_replacement(available_rails, i):
                 combinations.append(list(combo))
         return combinations

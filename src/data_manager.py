@@ -1,6 +1,7 @@
 import os
 import sys
-from json import load, dump
+from json import dump, load
+
 
 class DataManager:
     _instance = None
@@ -20,7 +21,7 @@ class DataManager:
 
     def get_file_path(self, file_name):
         """Determine the correct file path for data.json."""
-        if getattr(sys, '_MEIPASS', False):
+        if getattr(sys, "_MEIPASS", False):
             # PyInstaller bundle (extracted temp directory)
             return os.path.join(sys._MEIPASS, file_name)
         else:
@@ -36,7 +37,7 @@ class DataManager:
         """Save sorted data to JSON."""
         self.data["panel_models"].sort(key=lambda x: x["name"])
         self.data["rails"].sort(key=lambda x: int(x))
-        with open(self.file_path, 'w') as f:
+        with open(self.file_path, "w") as f:
             dump(self.data, f, indent=4)
 
     def get_panel_models(self):
