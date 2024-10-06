@@ -19,6 +19,7 @@ class App(CTk):
         self.input_fields = None
         self.row_fields = None
         self.tabview = None
+        self.editing_data = False
         # Setup
         self.build_ui()
         self.init_inputs()
@@ -53,23 +54,36 @@ class App(CTk):
         self.edit_data_button = CTkButton(
             master=self.sidebar,
             text="Edit Data",
+            height=22,
             corner_radius=0,
-            command=lambda: edit_data(
-                self.preview_frame, self.panel_fields.load_panel_models
-            ),
+            command=self.edit_data,
         )
-        self.edit_data_button.grid(row=1, column=0, sticky="ew")
+        self.edit_data_button.grid(row=1, column=0, padx=(0, 1), sticky="ew")
+        self.restore_defaults_button = CTkButton(
+            master=self.sidebar,
+            text="Restore Defaults",
+            height=22,
+            corner_radius=0,
+            command=lambda: self.set_default_inputs(True),
+        )
+        self.restore_defaults_button.grid(row=1, column=1, padx=(0, 1), sticky="ew")
         self.get_results_button = CTkButton(
             master=self.sidebar,
             text="Get Results",
+            font=("CTkDefaultFont", 13, "bold"),
+            height=30,
             corner_radius=0,
             command=self.calculate_and_preview,
         )
-        self.get_results_button.grid(row=1, column=1, padx=(1, 0), sticky="ew")
+        self.get_results_button.grid(
+            row=2, column=0, columnspan=2, pady=(2, 0), sticky="ew"
+        )
 
         # Preview Frame
         self.preview_frame = CTkScrollableFrame(master=self, fg_color="transparent")
         self.preview_frame.grid(row=0, column=1, sticky="nsew")
+
+        self.data_frame = CTkScrollableFrame(master=self, fg_color="transparent")
 
     def init_inputs(self):
         """Initialize the input fields for panel and racking settings."""
@@ -80,10 +94,16 @@ class App(CTk):
         # Racking Fields (Below the panel fields)
         self.racking_fields = RackingInputFields(self.tabview.get_input_frame())
         self.racking_fields.create_input_widgets(
-            starting_row=len(self.panel_fields.inputs) + 3
+            starting_row=len(self.panel_fields.inputs) + 2
         )
 
-    def set_default_inputs(self):
+    def set_default_inputs(self, ask=False):
+        if ask:
+            if not messagebox.askyesno(
+                title="Overwrite Inputs",
+                message="Do you want to overwrite all inputs to their default values?",
+            ):
+                return
         self.panel_fields.restore_default_values()
         self.racking_fields.restore_default_values()
 
@@ -130,6 +150,22 @@ class App(CTk):
 
     def show_warning_dialog(self, title, message):
         messagebox.showwarning(title, message)
+
+    def edit_data(self):
+        if self.editing_data:
+            return  # Exit if already editing
+        self.editing_data = True
+        self.preview_frame.grid_forget()
+        self.data_frame.grid(row=0, column=1, sticky="nsew")
+        edit_data(
+            self.data_frame, self.panel_fields.load_panel_models, self.on_save_changes
+        )
+
+    def on_save_changes(self):
+        """Callback function to be passed to edit_data, called after saving changes."""
+        self.editing_data = False
+        self.data_frame.grid_forget()
+        self.preview_frame.grid(row=0, column=1, sticky="nsew")
 
 
 if __name__ == "__main__":

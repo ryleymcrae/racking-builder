@@ -121,7 +121,9 @@ def update_results(results_frame, equipment_data, psi_data=None):
         value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
         rails_label = CTkLabel(
             row_lengths_frame,
-            text=" ".join([f'{length}": {count}' for length, count in all_rails[i].items()]),
+            text=" ".join(
+                [f'{length}": {count}' for length, count in all_rails[i].items()]
+            ),
             anchor="w",
             font=("TkDefaultFont", 10),
             height=20,
@@ -137,9 +139,9 @@ def update_results(results_frame, equipment_data, psi_data=None):
         waste_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
 
 
-def edit_data(preview_frame, load_panel_models):
+def edit_data(preview_frame, load_panel_models, save_changes_callback):
     from data_manager import DataManager
-    
+
     # Get the DataManager instance
     data_manager = DataManager()
 
@@ -148,14 +150,12 @@ def edit_data(preview_frame, load_panel_models):
         child.grid_forget()
 
     # Enable/Disable save and discard buttons
-    def enable_save_discard():
-        save_button.configure(state="normal")
+    def enable_discard():
         discard_button.configure(state="normal")
 
-    def disable_save_discard():
-        save_button.configure(state="disabled")
+    def disable_discard():
         discard_button.configure(state="disabled")
-        
+
     # Define save and discard functions
     def save_changes():
         # Convert panel widths and heights to floats
@@ -186,18 +186,20 @@ def edit_data(preview_frame, load_panel_models):
         # Save the data and update the UI
         data_manager.save_data()
         load_panel_models(True)
-        disable_save_discard()
+        disable_discard()
+        render_data()
+        save_changes_callback()
 
     def discard_changes():
         # Reload the old data and update the UI
         data_manager.data = data_manager.load_data()
-        disable_save_discard()
+        disable_discard()
         render_data()
 
     def add_panel():
         """Add a new empty panel model."""
         data_manager.add_panel_model()
-        enable_save_discard()
+        enable_discard()
         render_data()
 
     def delete_panel(index):
@@ -208,18 +210,18 @@ def edit_data(preview_frame, load_panel_models):
             )
         else:
             data_manager.delete_panel_model(index)
-            enable_save_discard()
+            enable_discard()
             render_data()
 
     def modify_panel(index, key, value):
         """Modify a specific panel's attribute."""
         data_manager.update_panel_model(index, key, value)
-        enable_save_discard()
+        enable_discard()
 
     def add_rail():
         """Add a new rail length."""
         data_manager.add_rail()
-        enable_save_discard()
+        enable_discard()
         render_data()
 
     def delete_rail(index):
@@ -230,13 +232,13 @@ def edit_data(preview_frame, load_panel_models):
             )
         else:
             data_manager.delete_rail(index)
-            enable_save_discard()
+            enable_discard()
             render_data()
 
     def modify_rail(index, value):
         """Modify a specific rail length."""
         data_manager.update_rail(index, value)
-        enable_save_discard()
+        enable_discard()
 
     # Render the data into the frames
     def render_data():
@@ -261,7 +263,10 @@ def edit_data(preview_frame, load_panel_models):
             panel_frame, text="Height (in.)", font=("TkDefaultFont", 13, "bold")
         ).grid(row=0, column=2, padx=8, pady=4, sticky="w")
         CTkButton(panel_frame, text="Add Panel", command=add_panel).grid(
-            row=len(data_manager.data["panel_models"]) + 1, column=0, padx=4, pady=(4, 8)
+            row=len(data_manager.data["panel_models"]) + 1,
+            column=0,
+            padx=4,
+            pady=(4, 8),
         )
         # Populate panel data with editable fields
         for i, panel in enumerate(data_manager.data["panel_models"]):
@@ -298,12 +303,12 @@ def edit_data(preview_frame, load_panel_models):
                 width=0,
                 command=lambda idx=i: delete_panel(idx),
             ).grid(row=i + 1, column=3, padx=(4, 8), pady=4)
-        
+
         # Add column header and "Add Rail" button in the rail_frame
         CTkLabel(
             rail_frame, text="Length (in.)", font=("TkDefaultFont", 13, "bold")
         ).grid(row=0, column=0, padx=8, pady=4, sticky="w")
-        
+
         CTkButton(rail_frame, text="Add Rail", command=add_rail).grid(
             row=len(data_manager.data["rails"]) + 1, column=0, padx=4, pady=(4, 8)
         )
@@ -326,36 +331,40 @@ def edit_data(preview_frame, load_panel_models):
 
         # Apply UI updates
         preview_frame.update_idletasks()
-    
+
     # Panel Models Section
     CTkLabel(
         preview_frame,
         text="Panels",
         font=("TkDefaultFont", 20, "bold"),
-    ).grid(row=0, column=0, columnspan=3, padx=4, pady=(8, 0), sticky="w")
+    ).grid(row=0, column=0, padx=4, pady=(8, 0), sticky="w")
 
     panel_frame = CTkFrame(preview_frame)
-    panel_frame.grid(row=1, column=0, columnspan=3, padx=4, pady=8, sticky="w")
-    
+    panel_frame.grid(row=1, column=0, padx=4, pady=8, sticky="w")
+
     # Rail Lengths Section
     CTkLabel(
         preview_frame,
         text="Rails",
         font=("TkDefaultFont", 20, "bold"),
-    ).grid(row=2, column=0, columnspan=3, padx=4, pady=(8, 0), sticky="w")
+    ).grid(row=2, column=0, padx=4, pady=(8, 0), sticky="w")
 
     rail_frame = CTkFrame(preview_frame)
-    rail_frame.grid(row=3, column=0, columnspan=3, padx=4, pady=8, sticky="w")
-    
+    rail_frame.grid(row=3, column=0, padx=4, pady=8, sticky="w")
+
+    empty_frame = CTkFrame(preview_frame, height=50, fg_color="transparent")
+    empty_frame.grid(row=4, sticky="ew")
+
+    button_frame = CTkFrame(preview_frame.master, fg_color="transparent")
+    button_frame.place(x=110, y=630)
+
     # Save and Discard Buttons
-    save_button = CTkButton(
-        preview_frame, text="Save Changes", command=save_changes, state="disabled"
-    )
-    save_button.grid(row=4, column=0, padx=4, pady=8)
+    save_button = CTkButton(button_frame, text="Save Changes", command=save_changes)
+    save_button.grid(row=0, column=0, padx=(8, 0), pady=8, sticky="w")
 
     discard_button = CTkButton(
-        preview_frame, text="Discard Changes", command=discard_changes, state="disabled"
+        button_frame, text="Discard Changes", command=discard_changes, state="disabled"
     )
-    discard_button.grid(row=4, column=1, padx=4, pady=8)
+    discard_button.grid(row=0, column=1, padx=(40, 8), pady=8, sticky="w")
     # Initially render the data
     render_data()
