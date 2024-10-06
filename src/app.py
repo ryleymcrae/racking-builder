@@ -2,8 +2,8 @@ from tkinter import messagebox
 
 from customtkinter import CTk, CTkButton, CTkFrame, CTkScrollableFrame
 
-from controller import update_preview_frame, update_results
-from ui import PanelFields, RackingFields, RowFields, TabView
+from controller import edit_data, update_preview_frame, update_results
+from ui import PanelInputFields, RackingInputFields, RowFields, TabView
 from utils import *
 
 
@@ -50,13 +50,15 @@ class App(CTk):
         )  # Add this line to grid it
 
         # Buttons
-        self.restore_defaults_button = CTkButton(
+        self.edit_data_button = CTkButton(
             master=self.sidebar,
-            text="Restore Defaults",
+            text="Edit Data",
             corner_radius=0,
-            command=lambda: self.set_default_inputs(True),
+            command=lambda: edit_data(
+                self.preview_frame, self.panel_fields.load_panel_models
+            ),
         )
-        self.restore_defaults_button.grid(row=1, column=0, sticky="ew")
+        self.edit_data_button.grid(row=1, column=0, sticky="ew")
         self.get_results_button = CTkButton(
             master=self.sidebar,
             text="Get Results",
@@ -72,23 +74,16 @@ class App(CTk):
     def init_inputs(self):
         """Initialize the input fields for panel and racking settings."""
         # Panel Fields
-        self.panel_fields = PanelFields(self.tabview.get_input_frame())
+        self.panel_fields = PanelInputFields(self.tabview.get_input_frame())
         self.panel_fields.create_input_widgets()
 
         # Racking Fields (Below the panel fields)
-        self.racking_fields = RackingFields(self.tabview.get_input_frame())
+        self.racking_fields = RackingInputFields(self.tabview.get_input_frame())
         self.racking_fields.create_input_widgets(
             starting_row=len(self.panel_fields.inputs) + 3
         )
 
-    def set_default_inputs(self, ask=False):
-        if ask:
-            if not messagebox.askyesno(
-                title="Overwrite Inputs",
-                message="Do you want to overwrite all inputs to their default values?",
-            ):
-                return
-
+    def set_default_inputs(self):
         self.panel_fields.restore_default_values()
         self.racking_fields.restore_default_values()
 
@@ -99,9 +94,8 @@ class App(CTk):
 
     def calculate_and_preview(self):
         """Collect inputs and calculate the results."""
+        user_inputs = {}
         try:
-            user_inputs = {}
-
             # Process inputs for both panel and racking fields
             user_inputs.update(process_fields(self.panel_fields))
             user_inputs.update(process_fields(self.racking_fields))

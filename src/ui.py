@@ -1,8 +1,7 @@
-from typing import Dict, Tuple, Union
+from typing import Dict
 
 from customtkinter import (
     CTkButton,
-    CTkCheckBox,
     CTkEntry,
     CTkFrame,
     CTkLabel,
@@ -11,11 +10,12 @@ from customtkinter import (
     CTkTabview,
 )
 
+from data_manager import DataManager
 from enums import *
 
 
 class TabView(CTkTabview):
-    _tab_names = ["Array Information", "Rows", "Results"]
+    _tab_names = ["Inputs", "Rows", "Results"]
 
     def __init__(self, master, width=325, fg_color="transparent"):
         """Initialize the TabView with tabs and associated frames."""
@@ -29,7 +29,7 @@ class TabView(CTkTabview):
             self.tab(tab_name).grid_columnconfigure(0, weight=1)
 
         # Input frame in the first tab
-        self.input_frame = CTkFrame(master=self.tab("Array Information"))
+        self.input_frame = CTkFrame(master=self.tab("Inputs"))
         self.input_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
 
         # Row frame in the second tab
@@ -55,11 +55,11 @@ class TabView(CTkTabview):
         return self.results_frame
 
 
-# InputFields class remains mostly unchanged but now dynamically creates input fields
 class InputFields:
     def __init__(self, parent, fields):
         self.parent = parent
         self.inputs: Dict[str, InputField] = {}
+        self.data_manager = DataManager()
         self.create_input_fields(fields)
 
     def create_input_fields(self, fields):
@@ -72,6 +72,8 @@ class InputFields:
                 input_widget = CTkOptionMenu(
                     self.parent, values=[str(e) for e in field_type]
                 )
+            elif field_type is str:
+                input_widget = CTkOptionMenu(self.parent, values=["Default"])
             else:  # Otherwise, use CTkEntry for numeric input
                 input_widget = CTkEntry(self.parent)
             units_label = CTkLabel(self.parent, text=units) if units else None
@@ -108,7 +110,7 @@ class InputFields:
         return self.inputs[field_name].get_valid_range()
 
     def get_input_variable_type(self, field_name: str):
-        """Get the valid range of a specific input field."""
+        """Get the variable type of a specific input field."""
         return self.inputs[field_name].get_variable_type()
 
     def restore_default_values(self):
@@ -136,7 +138,7 @@ class InputField:
 
     def grid(self, row):
         self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
-        self.input_widget.grid(row=row, column=1, padx=8, pady=4, sticky="ew")
+        self.input_widget.grid(row=row, column=1, padx=8, pady=4, sticky="w")
         if self.units_label:
             self.units_label.grid(row=row, column=2, padx=8, pady=4, sticky="ew")
 
@@ -173,31 +175,53 @@ class InputField:
 
 
 # Modify PanelFields to pass new field data structure to InputFields
-class PanelFields(InputFields):
+class PanelInputFields(InputFields):
+    # Passed to parent class and processed to create InputField instances
     _fields = {
-        "panel_model": (PanelType, str(PanelType.LONGI505), None, None),
-        "panel_width": (float, PanelType.LONGI505.width_inches, "in.", (20, 60)),
-        "panel_height": (float, PanelType.LONGI505.height_inches, "in.", (40, 100)),
+        "panel_model": (str, "", None, None),
+        "panel_width": (float, "", "in.", (20, 60)),
+        "panel_height": (float, "", "in.", (40, 100)),
     }
 
     def __init__(self, parent):
         super().__init__(parent, self._fields)
         self.inputs["panel_model"].input_widget.configure(
-            command=self.set_panel_dimensions
+            command=lambda e: self.set_panel_dimensions(e)
         )
+        self.load_panel_models(True)
 
     def set_panel_dimensions(self, panel_model: str):
         """Set the dimensions of the panel based on the selected model."""
-        panel = PanelType.map()[panel_model]
-        self.inputs["panel_height"].set(panel.height_inches, True, self.parent)
-        self.inputs["panel_width"].set(panel.width_inches, True, self.parent)
+        panel_models = self.data_manager.get_panel_models()
+        panel_names = [panel["name"] for panel in panel_models]
+        for i in range(len(panel_names)):
+            if panel_names[i] == panel_model:
+                self.inputs["panel_height"].set(panel_models[i]["height"], True, self.parent)
+                self.inputs["panel_width"].set(panel_models[i]["width"], True, self.parent)
 
     def create_input_widgets(self, starting_row=0):
         return super().create_input_widgets("Panel Specifications", starting_row)
 
+    def load_panel_models(self, reset_selection=False):
+        # Fetch panel models from data manager
+        panel_names = [panel["name"] for panel in self.data_manager.get_panel_models()]
+
+        # Update the OptionMenu's values
+        self.inputs["panel_model"].input_widget.configure(values=panel_names)
+
+        if reset_selection and panel_names:
+            def update_widgets():
+                first_panel = self.data_manager.get_panel_models()[0]
+                self.inputs["panel_model"].set(first_panel["name"])
+                self.inputs["panel_height"].set(first_panel["height"])
+                self.inputs["panel_width"].set(first_panel["width"])
+
+            self.parent.after(0, update_widgets)
+
 
 # Modify RackingFields to pass new field data structure to InputFields
-class RackingFields(InputFields):
+class RackingInputFields(InputFields):
+    # Passed to parent class and processed to create InputField instances
     _fields = {
         "pattern": (RackingPattern, str(RackingPattern.CONTINUOUS), None, None),
         "rafter_spacing": (RafterSpacing, str(RafterSpacing.SIXTEEN), "in.", None),

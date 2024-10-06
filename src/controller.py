@@ -1,4 +1,13 @@
-from customtkinter import LEFT, CTkFrame, CTkLabel, CTkScrollableFrame
+from tkinter import messagebox
+
+from customtkinter import (
+    LEFT,
+    CTkButton,
+    CTkEntry,
+    CTkFrame,
+    CTkLabel,
+    CTkScrollableFrame,
+)
 
 
 def update_preview_frame(preview_frame, row_data, user_inputs):
@@ -126,3 +135,227 @@ def update_results(results_frame, equipment_data, psi_data=None):
             height=20,
         )
         waste_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
+
+
+def edit_data(preview_frame, load_panel_models):
+    from data_manager import DataManager
+    
+    # Get the DataManager instance
+    data_manager = DataManager()
+
+    # Clear the frame
+    for child in preview_frame.winfo_children():
+        child.grid_forget()
+
+    # Enable/Disable save and discard buttons
+    def enable_save_discard():
+        save_button.configure(state="normal")
+        discard_button.configure(state="normal")
+
+    def disable_save_discard():
+        save_button.configure(state="disabled")
+        discard_button.configure(state="disabled")
+        
+    # Define save and discard functions
+    def save_changes():
+        # Convert panel widths and heights to floats
+        for panel in data_manager.data["panel_models"]:
+            try:
+                if panel["name"] == "":
+                    return messagebox.showwarning(
+                        "Invalid Panel Name", f"Panel name cannot be empty."
+                    )
+                panel["width"] = float(panel["width"])
+                panel["height"] = float(panel["height"])
+            except ValueError:
+                return messagebox.showwarning(
+                    "Invalid Panel Dimension",
+                    f'Width or height for Panel "{panel["name"]}" is not valid.',
+                )
+
+        # Convert rail lengths to floats
+        for i in range(len(data_manager.data["rails"])):
+            try:
+                data_manager.data["rails"][i] = float(data_manager.data["rails"][i])
+            except ValueError:
+                return messagebox.showwarning(
+                    "Invalid Row Length",
+                    f'Rail length "{data_manager.data["rails"][i]}" is not valid.',
+                )
+
+        # Save the data and update the UI
+        data_manager.save_data()
+        load_panel_models(True)
+        disable_save_discard()
+
+    def discard_changes():
+        # Reload the old data and update the UI
+        data_manager.data = data_manager.load_data()
+        disable_save_discard()
+        render_data()
+
+    def add_panel():
+        """Add a new empty panel model."""
+        data_manager.add_panel_model()
+        enable_save_discard()
+        render_data()
+
+    def delete_panel(index):
+        """Delete the panel at the given index, but warn if only 1 panel is left."""
+        if len(data_manager.data["panel_models"]) == 1:
+            messagebox.showwarning(
+                "Cannot Delete", "There must be at least one panel in the list."
+            )
+        else:
+            data_manager.delete_panel_model(index)
+            enable_save_discard()
+            render_data()
+
+    def modify_panel(index, key, value):
+        """Modify a specific panel's attribute."""
+        data_manager.update_panel_model(index, key, value)
+        enable_save_discard()
+
+    def add_rail():
+        """Add a new rail length."""
+        data_manager.add_rail()
+        enable_save_discard()
+        render_data()
+
+    def delete_rail(index):
+        """Delete the rail at the given index, but warn if only 1 rail is left."""
+        if len(data_manager.data["rails"]) == 1:
+            messagebox.showwarning(
+                "Cannot Delete", "There must be at least one rail in the list."
+            )
+        else:
+            data_manager.delete_rail(index)
+            enable_save_discard()
+            render_data()
+
+    def modify_rail(index, value):
+        """Modify a specific rail length."""
+        data_manager.update_rail(index, value)
+        enable_save_discard()
+
+    # Render the data into the frames
+    def render_data():
+        # Freeze UI updates
+        preview_frame.update_idletasks()
+
+        # Clear previous content in the frames
+        for child in panel_frame.winfo_children():
+            child.grid_forget()
+        # Clear previous content in the frames
+        for child in rail_frame.winfo_children():
+            child.grid_forget()
+
+        # Add column headers and "Add Panel" button in the panel_frame
+        CTkLabel(
+            panel_frame, text="Model Name", font=("TkDefaultFont", 13, "bold")
+        ).grid(row=0, column=0, padx=8, pady=4, sticky="w")
+        CTkLabel(
+            panel_frame, text="Width (in.)", font=("TkDefaultFont", 13, "bold")
+        ).grid(row=0, column=1, padx=8, pady=4, sticky="w")
+        CTkLabel(
+            panel_frame, text="Height (in.)", font=("TkDefaultFont", 13, "bold")
+        ).grid(row=0, column=2, padx=8, pady=4, sticky="w")
+        CTkButton(panel_frame, text="Add Panel", command=add_panel).grid(
+            row=len(data_manager.data["panel_models"]) + 1, column=0, padx=4, pady=(4, 8)
+        )
+        # Populate panel data with editable fields
+        for i, panel in enumerate(data_manager.data["panel_models"]):
+            name_entry = CTkEntry(panel_frame)
+            name_entry.insert(0, panel.get("name", ""))
+            name_entry.grid(row=i + 1, column=0, padx=(8, 4), pady=4)
+            name_entry.bind(
+                "<KeyRelease>",
+                lambda _, idx=i, entry=name_entry: modify_panel(
+                    idx, "name", entry.get()
+                ),
+            )
+            width_entry = CTkEntry(panel_frame)
+            width_entry.insert(0, panel.get("width", ""))
+            width_entry.grid(row=i + 1, column=1, padx=4, pady=4)
+            width_entry.bind(
+                "<KeyRelease>",
+                lambda _, idx=i, entry=width_entry: modify_panel(
+                    idx, "width", entry.get()
+                ),
+            )
+            height_entry = CTkEntry(panel_frame)
+            height_entry.insert(0, panel.get("height", ""))
+            height_entry.grid(row=i + 1, column=2, padx=4, pady=4)
+            height_entry.bind(
+                "<KeyRelease>",
+                lambda _, idx=i, entry=height_entry: modify_panel(
+                    idx, "height", entry.get()
+                ),
+            )
+            CTkButton(
+                panel_frame,
+                text="Delete",
+                width=0,
+                command=lambda idx=i: delete_panel(idx),
+            ).grid(row=i + 1, column=3, padx=(4, 8), pady=4)
+        
+        # Add column header and "Add Rail" button in the rail_frame
+        CTkLabel(
+            rail_frame, text="Length (in.)", font=("TkDefaultFont", 13, "bold")
+        ).grid(row=0, column=0, padx=8, pady=4, sticky="w")
+        
+        CTkButton(rail_frame, text="Add Rail", command=add_rail).grid(
+            row=len(data_manager.data["rails"]) + 1, column=0, padx=4, pady=(4, 8)
+        )
+
+        # Populate rail data with editable fields
+        for i, rail in enumerate(data_manager.data["rails"]):
+            rail_entry = CTkEntry(rail_frame)
+            rail_entry.insert(0, rail)
+            rail_entry.grid(row=i + 1, column=0, padx=(8, 4), pady=4)
+            rail_entry.bind(
+                "<KeyRelease>",
+                lambda _, idx=i, entry=rail_entry: modify_rail(idx, entry.get()),
+            )
+            CTkButton(
+                rail_frame,
+                text="Delete",
+                width=0,
+                command=lambda idx=i: delete_rail(idx),
+            ).grid(row=i + 1, column=1, padx=(4, 8), pady=4)
+
+        # Apply UI updates
+        preview_frame.update_idletasks()
+    
+    # Panel Models Section
+    CTkLabel(
+        preview_frame,
+        text="Panels",
+        font=("TkDefaultFont", 20, "bold"),
+    ).grid(row=0, column=0, columnspan=3, padx=4, pady=(8, 0), sticky="w")
+
+    panel_frame = CTkFrame(preview_frame)
+    panel_frame.grid(row=1, column=0, columnspan=3, padx=4, pady=8, sticky="w")
+    
+    # Rail Lengths Section
+    CTkLabel(
+        preview_frame,
+        text="Rails",
+        font=("TkDefaultFont", 20, "bold"),
+    ).grid(row=2, column=0, columnspan=3, padx=4, pady=(8, 0), sticky="w")
+
+    rail_frame = CTkFrame(preview_frame)
+    rail_frame.grid(row=3, column=0, columnspan=3, padx=4, pady=8, sticky="w")
+    
+    # Save and Discard Buttons
+    save_button = CTkButton(
+        preview_frame, text="Save Changes", command=save_changes, state="disabled"
+    )
+    save_button.grid(row=4, column=0, padx=4, pady=8)
+
+    discard_button = CTkButton(
+        preview_frame, text="Discard Changes", command=discard_changes, state="disabled"
+    )
+    discard_button.grid(row=4, column=1, padx=4, pady=8)
+    # Initially render the data
+    render_data()
