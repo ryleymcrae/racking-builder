@@ -196,8 +196,12 @@ class PanelInputFields(InputFields):
         panel_names = [panel["name"] for panel in panel_models]
         for i in range(len(panel_names)):
             if panel_names[i] == panel_model:
-                self.inputs["panel_height"].set(panel_models[i]["height"], True, self.parent)
-                self.inputs["panel_width"].set(panel_models[i]["width"], True, self.parent)
+                self.inputs["panel_height"].set(
+                    panel_models[i]["height"], True, self.parent
+                )
+                self.inputs["panel_width"].set(
+                    panel_models[i]["width"], True, self.parent
+                )
 
     def create_input_widgets(self, starting_row=0):
         return super().create_input_widgets("Panel Specifications", starting_row)
@@ -210,10 +214,14 @@ class PanelInputFields(InputFields):
         self.inputs["panel_model"].input_widget.configure(values=panel_names)
 
         if reset_selection and panel_names:
+
             def update_widgets():
                 first_panel = self.data_manager.get_panel_models()[0]
+                self.inputs["panel_model"].default_value = first_panel["name"]
                 self.inputs["panel_model"].set(first_panel["name"])
+                self.inputs["panel_height"].default_value = first_panel["height"]
                 self.inputs["panel_height"].set(first_panel["height"])
+                self.inputs["panel_width"].default_value = first_panel["width"]
                 self.inputs["panel_width"].set(first_panel["width"])
 
             self.parent.after(0, update_widgets)
