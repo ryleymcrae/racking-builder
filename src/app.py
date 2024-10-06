@@ -114,6 +114,12 @@ class App(CTk):
 
     def calculate_and_preview(self):
         """Collect inputs and calculate the results."""
+        if self.editing_data:
+            return messagebox.showwarning(
+                title="Editing in Progress",
+                message="Please finish editing data before getting results."
+            )
+        
         user_inputs = {}
         try:
             # Process inputs for both panel and racking fields
