@@ -47,10 +47,14 @@ def process_fields(fields):
 
 
 def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
-    RAIL_LENGTHS = [140, 185]
+    from data_manager import DataManager
+
+    data_manager = DataManager()
+
+    rail_lengths = data_manager.get_rails()
+    num_rails = {length: 0 for length in rail_lengths}
 
     num_panels_total = 0
-    num_rails = {length: 0 for length in RAIL_LENGTHS}
     num_mounts = 0
     num_mids = 0
     num_ends = 0
@@ -95,15 +99,18 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
                 )  # Bottom row
             )
 
-        num_140, num_185, num_splices, waste, rails = optimal_rail_selection(
-            rail_length
+        rail_counts, num_splices, waste, rails = optimal_rail_selection(
+            rail_length, rail_lengths
         )
-        num_rails[140] += num_140
-        num_rails[185] += num_185
+
+        # Update the total count of rails used
+        for rail_length, count in rail_counts.items():
+            num_rails[rail_length] += count
+
         num_splices_total += num_splices
         total_waste += waste
         all_wastes.append(round(waste, 2))
-        all_rails.append((rails.count(140), rails.count(185)))
+        all_rails.append(rail_counts)
         row_lengths.append(round(row_length, 2))
 
     equipment = {
@@ -121,53 +128,41 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     return equipment
 
 
-def optimal_rail_selection(rail_length):
-    available_rails = [140, 185]  # Available rail lengths in inches
+def optimal_rail_selection(rail_length, available_rails):
+    from itertools import combinations_with_replacement
+
     best_combination = None  # To store the best combination found
     least_waste = float("inf")  # Start with a large value for least waste
     best_splices = 0  # To store the number of splices for the best combination
-    rail_length *= 2
-
+    rail_length *= 2  # Multiply by 2 for both rows
+    
     # Helper function to calculate splices
     def calculate_splices(rail_combo):
         n = len(rail_combo)
         if n < 3:
             return 0
         else:
-            return ((n - 1) // 2) * 2
+            return ((n - 1) // 2) * 2  # Add 2 splices for every two rails after the first
 
     # Function to calculate the rail waste for a given pattern
     def calculate_waste(rails, length_needed):
         total_length = sum(rails)
-        waste = (
-            total_length - length_needed
-            if total_length >= length_needed
-            else float("inf")
-        )
+        waste = total_length - length_needed
         return waste if waste >= 0 else float("inf")
 
-    # Iterate over all combinations of rails for the top row
+    # Generate combinations of available rails
     def generate_combinations():
-        # Try all possible combinations of 140 and 185 inch rails
         combinations = []
-        for i in range(
-            1, int(rail_length // min(available_rails)) + 3
-        ):  # Roughly estimate the max number of rails needed
-            for j in range(
-                i + 1
-            ):  # j is the number of 140 inch rails in the combination
-                num_140 = j
-                num_185 = i - j
-                if num_185 >= 0:
-                    combination = [140] * num_140 + [185] * num_185
-                    combinations.append(combination)
+        for i in range(1, int(rail_length // min(available_rails)) + 3): 
+            for combo in combinations_with_replacement(available_rails, i):
+                combinations.append(list(combo))
         return combinations
 
     # Try all combinations and compute the waste for both rows
     for combo in generate_combinations():
         waste = calculate_waste(combo, rail_length)
 
-        if waste != float("inf"):  # Check if the combination works for the top row
+        if waste != float("inf"):
             splices = calculate_splices(combo)
 
             # If this configuration has less waste, update the best combination
@@ -176,14 +171,10 @@ def optimal_rail_selection(rail_length):
                 best_combination = combo
                 best_splices = splices
 
+    rail_counts = {length: best_combination.count(length) for length in available_rails}
+
     # Return the best combination and the number of splices
-    return (
-        best_combination.count(140),
-        best_combination.count(185),
-        best_splices,
-        least_waste,
-        best_combination,
-    )
+    return rail_counts, best_splices, least_waste, best_combination
 
 
 def get_psi_data(row_data):
