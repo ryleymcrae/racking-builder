@@ -152,8 +152,9 @@ class App(CTk):
         update_preview_frame(self.preview_frame, row_data, user_inputs)
 
         equipment_data = get_equipment_data(row_data, user_inputs)
+        psf_data = get_psf_data(row_data, user_inputs)
 
-        update_results(self.tabview.get_results_frame(), equipment_data)
+        update_results(self.tabview.get_results_frame(), equipment_data, psf_data)
         self.tabview.set("Results")
 
     def show_warning_dialog(self, title, message):
@@ -178,6 +179,7 @@ class App(CTk):
         current_panel = self.panel_fields.get_input("panel_model")
         current_width = self.panel_fields.get_input("panel_width")
         current_height = self.panel_fields.get_input("panel_height")
+        current_weight = self.panel_fields.get_input("panel_weight")
         panel_names = [panel["name"] for panel in DataManager().get_panel_models()]
         
         self.panel_fields.load_panel_models()
@@ -186,12 +188,14 @@ class App(CTk):
             self.panel_fields.inputs["panel_model"].restore_default_value()
             self.panel_fields.inputs["panel_width"].restore_default_value()
             self.panel_fields.inputs["panel_height"].restore_default_value()
+            self.panel_fields.inputs["panel_weight"].restore_default_value()
         else:
             panel_models = DataManager().get_panel_models()
             for i in range(len(panel_models)):
                 if current_panel == panel_models[i]["name"] and (
                     current_width != str(panel_models[i]["width"])
                     or current_height != str(panel_models[i]["height"])
+                    or current_weight != str(panel_models[i]["weight"])
                 ):
                     self.panel_fields.set_panel_dimensions(current_panel)
                     break

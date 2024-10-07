@@ -17,7 +17,10 @@ def process_fields(fields):
     """Helper method to process input fields."""
     user_inputs = {}
     for field_name in fields.inputs.keys():
-        value = fields.get_input(field_name).strip()
+        value = fields.get_input(field_name)
+        
+        if isinstance(value, str):
+            value = value.strip()
 
         # Check if the input is empty
         if value == "":
@@ -71,7 +74,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     rail_protrusion = user_inputs["rail_protrusion"]
     rafter_spacing = float(str(user_inputs["rafter_spacing"]))
     pattern = user_inputs["pattern"]
-    first_bracket_inset = user_inputs["bracket_inset"]
+    bracket_inset = user_inputs["bracket_inset"]
 
     for i, (num_panels, orientation) in enumerate(row_data):
         num_panels_total += num_panels
@@ -79,24 +82,24 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         num_mids += 2 * (num_panels - 1)
 
         if orientation == "Landscape":
-            row_length = num_panels * panel_height + (num_panels - 1) * panel_spacing
+            row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
         else:
-            row_length = num_panels * panel_width + (num_panels - 1) * panel_spacing
+            row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
 
-        rail_length = row_length + 2 * rail_protrusion
+        rail_length = row_width + 2 * rail_protrusion
         mount_spacing = (48 // rafter_spacing) * rafter_spacing
 
         if pattern == RackingPattern.CONTINUOUS:
             num_mounts += 2 * (
-                (row_length - 2 * first_bracket_inset) // mount_spacing + 2
+                (row_width - 2 * bracket_inset) // mount_spacing + 2
             )
         else:
             num_mounts += (
-                (row_length - 2 * first_bracket_inset - mount_spacing / 2)
+                (row_width - 2 * bracket_inset - mount_spacing / 2)
                 // mount_spacing
                 + 3  # Top row
                 + (
-                    (row_length - 2 * first_bracket_inset) // mount_spacing + 2
+                    (row_width - 2 * bracket_inset) // mount_spacing + 2
                 )  # Bottom row
             )
 
@@ -112,7 +115,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         total_waste += waste
         all_wastes.append(round(waste, 2))
         all_rails.append(rail_counts)
-        row_lengths.append(round(row_length, 2))
+        row_lengths.append(round(row_width, 2))
 
     equipment = {
         "num_modules": num_panels_total,
@@ -180,6 +183,35 @@ def optimal_rail_selection(rail_length, available_rails):
     return rail_counts, best_splices, least_waste, best_combination
 
 
-def get_psi_data(row_data):
-    psi_dict = {}
-    return psi_dict
+def get_psf_data(row_data, user_inputs):
+    psf_data = []
+
+    panel_width = user_inputs["panel_width"]
+    panel_height = user_inputs["panel_height"]
+    panel_weight = user_inputs["panel_weight"]
+    panel_spacing = user_inputs["panel_spacing"]
+    bracket_inset = user_inputs["bracket_inset"]
+    portrait_rail_inset = user_inputs["portrait_rail_inset"]
+    landscape_rail_inset = user_inputs["landscape_rail_inset"]
+    truss_structure = user_inputs["truss_structure"]
+
+    for num_panels, orientation in row_data:
+        if orientation == "Landscape":
+            row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
+            footprint_height = panel_width - 2 * landscape_rail_inset
+        else:
+            row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
+            footprint_height = panel_height - 2 * portrait_rail_inset
+
+        footprint_width = row_width - 2 * bracket_inset
+        
+        if truss_structure:
+            footprint_area = (footprint_width + 78.7402) * (footprint_height + 78.7402)
+        else:
+            footprint_area = footprint_width * footprint_height
+
+        psf = round(num_panels * panel_weight / footprint_area * 144, 2)
+
+        psf_data.append(psf)
+
+    return psf_data
