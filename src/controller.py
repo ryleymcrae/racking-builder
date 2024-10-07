@@ -139,7 +139,7 @@ def update_results(results_frame, equipment_data, psi_data=None):
         waste_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
 
 
-def edit_data(preview_frame, load_panel_models, save_changes_callback):
+def edit_data(preview_frame, save_changes_callback):
     from data_manager import DataManager
 
     # Get the DataManager instance
@@ -185,7 +185,6 @@ def edit_data(preview_frame, load_panel_models, save_changes_callback):
 
         # Save the data and update the UI
         data_manager.save_data()
-        load_panel_models(True)
         disable_discard()
         render_data()
         save_changes_callback()
@@ -339,7 +338,7 @@ def edit_data(preview_frame, load_panel_models, save_changes_callback):
         font=("TkDefaultFont", 20, "bold"),
     ).grid(row=0, column=0, padx=4, pady=(8, 0), sticky="w")
 
-    panel_frame = CTkFrame(preview_frame)
+    panel_frame = CTkFrame(preview_frame, fg_color="transparent")
     panel_frame.grid(row=1, column=0, padx=4, pady=8, sticky="w")
 
     # Rail Lengths Section
@@ -349,22 +348,23 @@ def edit_data(preview_frame, load_panel_models, save_changes_callback):
         font=("TkDefaultFont", 20, "bold"),
     ).grid(row=2, column=0, padx=4, pady=(8, 0), sticky="w")
 
-    rail_frame = CTkFrame(preview_frame)
+    rail_frame = CTkFrame(preview_frame, fg_color="transparent")
     rail_frame.grid(row=3, column=0, padx=4, pady=8, sticky="w")
 
     empty_frame = CTkFrame(preview_frame, height=50, fg_color="transparent")
     empty_frame.grid(row=4, sticky="ew")
 
-    button_frame = CTkFrame(preview_frame.master, fg_color="transparent")
-    button_frame.place(x=110, y=630)
+    button_frame = CTkFrame(preview_frame.master)
+    button_frame.place(x=110, y=622)
 
     # Save and Discard Buttons
-    save_button = CTkButton(button_frame, text="Save Changes", command=save_changes)
-    save_button.grid(row=0, column=0, padx=(8, 0), pady=8, sticky="w")
-
     discard_button = CTkButton(
         button_frame, text="Discard Changes", command=discard_changes, state="disabled"
     )
-    discard_button.grid(row=0, column=1, padx=(40, 8), pady=8, sticky="w")
+    discard_button.grid(row=0, column=0, padx=(8, 0), pady=8, sticky="w")
+
+    save_button = CTkButton(button_frame, text="Save & Close", command=save_changes)
+    save_button.grid(row=0, column=1, padx=(40, 8), pady=8, sticky="w")
+
     # Initially render the data
     render_data()
