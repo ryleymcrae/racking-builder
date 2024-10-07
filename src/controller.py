@@ -163,13 +163,13 @@ def edit_data(preview_frame, save_changes_callback):
             try:
                 if panel["name"] == "":
                     return messagebox.showwarning(
-                        "Invalid Panel Name", f"Panel name cannot be empty."
+                        preview_frame.winfo_toplevel().title(), f"Panel name cannot be empty."
                     )
                 panel["width"] = float(panel["width"])
                 panel["height"] = float(panel["height"])
             except ValueError:
                 return messagebox.showwarning(
-                    "Invalid Panel Dimension",
+                    preview_frame.winfo_toplevel().title(),
                     f'Width or height for Panel "{panel["name"]}" is not valid.',
                 )
 
@@ -179,7 +179,7 @@ def edit_data(preview_frame, save_changes_callback):
                 data_manager.data["rails"][i] = int(data_manager.data["rails"][i])
             except ValueError:
                 return messagebox.showwarning(
-                    "Invalid Row Length",
+                    preview_frame.winfo_toplevel().title(),
                     f'Rail length "{data_manager.data["rails"][i]}" is not valid.',
                 )
 
@@ -205,7 +205,7 @@ def edit_data(preview_frame, save_changes_callback):
         """Delete the panel at the given index, but warn if only 1 panel is left."""
         if len(data_manager.data["panel_models"]) == 1:
             messagebox.showwarning(
-                "Cannot Delete", "There must be at least one panel in the list."
+                preview_frame.winfo_toplevel().title(), "There must be at least one panel in the list."
             )
         else:
             data_manager.delete_panel_model(index)
@@ -227,7 +227,7 @@ def edit_data(preview_frame, save_changes_callback):
         """Delete the rail at the given index, but warn if only 1 rail is left."""
         if len(data_manager.data["rails"]) == 1:
             messagebox.showwarning(
-                "Cannot Delete", "There must be at least one rail in the list."
+                preview_frame.winfo_toplevel().title(), "There must be at least one rail in the list."
             )
         else:
             data_manager.delete_rail(index)

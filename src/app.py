@@ -102,7 +102,7 @@ class App(CTk):
     def set_default_inputs(self, ask=False):
         if ask:
             if not messagebox.askyesno(
-                title="Overwrite Inputs",
+                title=self.TITLE,
                 message="Do you want to overwrite all inputs to their default values?",
             ):
                 return
@@ -118,7 +118,7 @@ class App(CTk):
         """Collect inputs and calculate the results."""
         if self.editing_data:
             return messagebox.showwarning(
-                title="Editing in Progress",
+                title=self.TITLE,
                 message="Please finish editing data before getting results.",
             )
 
@@ -130,7 +130,7 @@ class App(CTk):
 
         except ValueError as e:
             self.tabview.set("Inputs")
-            return self.show_warning_dialog("Invalid Array Input", str(e))
+            return self.show_warning_dialog(self.TITLE, str(e))
 
         user_row_data = self.row_fields.get_row_data()
         row_data = []
@@ -147,7 +147,7 @@ class App(CTk):
                     row_data.append((n, orientation))
         except ValueError as e:
             self.tabview.set("Rows")
-            return self.show_warning_dialog("Invalid Row Input", str(e))
+            return self.show_warning_dialog(self.TITLE, str(e))
 
         update_preview_frame(self.preview_frame, row_data, user_inputs)
 
