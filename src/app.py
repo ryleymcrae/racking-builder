@@ -58,7 +58,7 @@ class App(CTk):
             corner_radius=0,
             command=self.edit_data,
         )
-        self.edit_data_button.grid(row=1, column=0, padx=(0, 1), sticky="ew")
+        self.edit_data_button.grid(row=1, column=0, padx=(0, 2), sticky="ew")
         self.restore_defaults_button = CTkButton(
             master=self.sidebar,
             text="Restore Defaults",
@@ -66,7 +66,7 @@ class App(CTk):
             corner_radius=0,
             command=lambda: self.set_default_inputs(True),
         )
-        self.restore_defaults_button.grid(row=1, column=1, padx=(0, 1), sticky="ew")
+        self.restore_defaults_button.grid(row=1, column=1, sticky="ew")
         self.get_results_button = CTkButton(
             master=self.sidebar,
             text="Get Results",
