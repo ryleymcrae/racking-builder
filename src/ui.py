@@ -40,7 +40,7 @@ class TabView(CTkTabview):
         self.results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
         self.results_frame.grid_columnconfigure(1, weight=1)
 
-        CTkLabel(self.results_frame, text="Nothing to show yet.").pack(pady=(10, 0))
+        CTkLabel(self.results_frame, text="Nothing to show yet").pack(pady=(10, 0))
 
     def get_input_frame(self):
         """Return the input frame for external use."""
@@ -135,7 +135,7 @@ class InputField:
         self.units_label = units_label
         self.valid_range = valid_range
         self.restore_default_value()
-        self.input_widget.configure(width=170)
+        self.input_widget.configure(width=168)
 
     def grid(self, row):
         self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
@@ -179,7 +179,7 @@ class InputField:
 class PanelInputFields(InputFields):
     # Passed to parent class and processed to create InputField instances
     _fields = {
-        "panel_model": (str, "", None, None),
+        "panel_model": (str, "-- Select Panel --", None, None),
         "panel_width": (float, "", "in.", (20, 60)),
         "panel_height": (float, "", "in.", (40, 100)),
     }
@@ -189,7 +189,7 @@ class PanelInputFields(InputFields):
         self.inputs["panel_model"].input_widget.configure(
             command=lambda e: self.set_panel_dimensions(e)
         )
-        self.load_panel_models(True)
+        self.load_panel_models()
 
     def set_panel_dimensions(self, panel_model: str):
         """Set the dimensions of the panel based on the selected model."""
