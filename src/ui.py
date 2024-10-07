@@ -17,7 +17,7 @@ from enums import *
 class TabView(CTkTabview):
     _tab_names = ["Inputs", "Rows", "Results"]
 
-    def __init__(self, master, width=325, fg_color="transparent"):
+    def __init__(self, master, width=326, fg_color="transparent"):
         """Initialize the TabView with tabs and associated frames."""
         super().__init__(master=master, width=width, fg_color=fg_color)
         self.grid(row=0, column=0, sticky="nsew")
