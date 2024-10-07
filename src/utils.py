@@ -70,7 +70,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     rail_protrusion = user_inputs["rail_protrusion"]
     rafter_spacing = float(str(user_inputs["rafter_spacing"]))
     pattern = user_inputs["pattern"]
-    first_bracket_inset = user_inputs["first_bracket_inset"]
+    first_bracket_inset = user_inputs["bracket_inset"]
 
     for i, (num_panels, orientation) in enumerate(row_data):
         num_panels_total += num_panels

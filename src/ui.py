@@ -135,6 +135,7 @@ class InputField:
         self.units_label = units_label
         self.valid_range = valid_range
         self.restore_default_value()
+        self.input_widget.configure(width=170)
 
     def grid(self, row):
         self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
@@ -234,7 +235,7 @@ class RackingInputFields(InputFields):
         "pattern": (RackingPattern, str(RackingPattern.CONTINUOUS), None, None),
         "rafter_spacing": (RafterSpacing, str(RafterSpacing.SIXTEEN), "in.", None),
         "panel_spacing": (float, 0.625, "in.", (0.39, 0.7)),
-        "first_bracket_inset": (float, 10, "in.", (4, 16)),
+        "bracket_inset": (float, 10, "in.", (4, 16)),
         "rail_protrusion": (float, 4, "in.", (2, 6)),
     }
 
