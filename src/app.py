@@ -179,9 +179,13 @@ class App(CTk):
         current_width = self.panel_fields.get_input("panel_width")
         current_height = self.panel_fields.get_input("panel_height")
         panel_names = [panel["name"] for panel in DataManager().get_panel_models()]
+        
+        self.panel_fields.load_panel_models()
 
         if current_panel not in panel_names:
-            self.panel_fields.load_panel_models(True)
+            self.panel_fields.inputs["panel_model"].restore_default_value()
+            self.panel_fields.inputs["panel_width"].restore_default_value()
+            self.panel_fields.inputs["panel_height"].restore_default_value()
         else:
             panel_models = DataManager().get_panel_models()
             for i in range(len(panel_models)):
