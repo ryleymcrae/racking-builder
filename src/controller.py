@@ -57,7 +57,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             ).pack(side=LEFT, pady=(0, 2))
 
 
-def update_results(results_frame, equipment_data, psi_data=None):
+def update_results(results_frame, equipment_data, psf_data):
     for child in results_frame.winfo_children():
         child.destroy()
 
@@ -93,7 +93,7 @@ def update_results(results_frame, equipment_data, psi_data=None):
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
-    row_lengths_label = CTkLabel(results_frame, text="Row Lengths")
+    row_lengths_label = CTkLabel(results_frame, text="Rows")
     row_lengths_label.grid(row=row, columnspan=2, pady=(16, 0))
     CTkFrame(results_frame, height=2).grid(
         row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
@@ -117,7 +117,7 @@ def update_results(results_frame, equipment_data, psi_data=None):
             row_lengths_frame, text=f"Row {i+1}", font=("TkDefaultFont", 12, "bold")
         )
         label.grid(row=i * 2, column=0, padx=8, sticky="w")
-        value_label = CTkLabel(row_lengths_frame, text=f'{length}"')
+        value_label = CTkLabel(row_lengths_frame, text=f'{psf_data[i]} psf / {length}"')
         value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
         rails_label = CTkLabel(
             row_lengths_frame,
@@ -167,10 +167,11 @@ def edit_data(preview_frame, save_changes_callback):
                     )
                 panel["width"] = float(panel["width"])
                 panel["height"] = float(panel["height"])
+                panel["weight"] = float(panel["weight"])
             except ValueError:
                 return messagebox.showwarning(
                     preview_frame.winfo_toplevel().title(),
-                    f'Width or height for Panel "{panel["name"]}" is not valid.',
+                    f'Width, height, or weight for Panel "{panel["name"]}" is not valid.',
                 )
 
         # Convert rail lengths to floats
@@ -261,6 +262,9 @@ def edit_data(preview_frame, save_changes_callback):
         CTkLabel(
             panel_frame, text="Height (in.)", font=("TkDefaultFont", 13, "bold")
         ).grid(row=0, column=2, padx=8, pady=4, sticky="w")
+        CTkLabel(
+            panel_frame, text="Weight (lbs)", font=("TkDefaultFont", 13, "bold")
+        ).grid(row=0, column=3, padx=8, pady=4, sticky="w")
         CTkButton(panel_frame, text="Add Panel", command=add_panel).grid(
             row=len(data_manager.data["panel_models"]) + 1,
             column=0,
@@ -278,7 +282,7 @@ def edit_data(preview_frame, save_changes_callback):
                     idx, "name", entry.get()
                 ),
             )
-            width_entry = CTkEntry(panel_frame)
+            width_entry = CTkEntry(panel_frame, width=100)
             width_entry.insert(0, panel.get("width", ""))
             width_entry.grid(row=i + 1, column=1, padx=4, pady=4)
             width_entry.bind(
@@ -287,13 +291,22 @@ def edit_data(preview_frame, save_changes_callback):
                     idx, "width", entry.get()
                 ),
             )
-            height_entry = CTkEntry(panel_frame)
+            height_entry = CTkEntry(panel_frame, width=100)
             height_entry.insert(0, panel.get("height", ""))
-            height_entry.grid(row=i + 1, column=2, padx=4, pady=4)
+            height_entry.grid(row=i + 1, column=2, padx=(8, 4), pady=4)
             height_entry.bind(
                 "<KeyRelease>",
                 lambda _, idx=i, entry=height_entry: modify_panel(
                     idx, "height", entry.get()
+                ),
+            )
+            weight_entry = CTkEntry(panel_frame, width=100)
+            weight_entry.insert(0, panel.get("weight", ""))
+            weight_entry.grid(row=i + 1, column=3, padx=4, pady=4)
+            weight_entry.bind(
+                "<KeyRelease>",
+                lambda _, idx=i, entry=weight_entry: modify_panel(
+                    idx, "weight", entry.get()
                 ),
             )
             CTkButton(
@@ -301,7 +314,7 @@ def edit_data(preview_frame, save_changes_callback):
                 text="Delete",
                 width=0,
                 command=lambda idx=i: delete_panel(idx),
-            ).grid(row=i + 1, column=3, padx=(4, 8), pady=4)
+            ).grid(row=i + 1, column=4, padx=(4, 8), pady=4)
 
         # Add column header and "Add Rail" button in the rail_frame
         CTkLabel(

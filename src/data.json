@@ -3,17 +3,26 @@
         {
             "name": "LR5-54HPB-405M",
             "width": 44.6457,
-            "height": 67.7953
+            "height": 67.7953,
+            "weight": 45.8561
         },
         {
             "name": "LR5-66HPH-505M",
             "width": 44.6457,
-            "height": 82.4409
+            "height": 82.4409,
+            "weight": 57.3201
         },
         {
             "name": "LR5-72HBD-540M",
             "width": 44.6063,
-            "height": 88.8189
+            "height": 88.8189,
+            "weight": 71.2092
+        },
+        {
+            "name": "LR5-72HPH-455M",
+            "width": 40.8661,
+            "height": 82.4409,
+            "weight": 51.8086
         }
     ],
     "rails": [
