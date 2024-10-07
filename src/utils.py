@@ -48,6 +48,7 @@ def process_fields(fields):
 
 def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     from data_manager import DataManager
+    from enums import RackingPattern
 
     data_manager = DataManager()
 
@@ -85,7 +86,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         rail_length = row_length + 2 * rail_protrusion
         mount_spacing = (48 // rafter_spacing) * rafter_spacing
 
-        if pattern == "Continuous":
+        if pattern == RackingPattern.CONTINUOUS:
             num_mounts += 2 * (
                 (row_length - 2 * first_bracket_inset) // mount_spacing + 2
             )
