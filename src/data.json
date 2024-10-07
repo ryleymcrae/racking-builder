@@ -1,9 +1,19 @@
 {
     "panel_models": [
         {
+            "name": "LR5-54HPB-405M",
+            "width": 44.6457,
+            "height": 67.7953
+        },
+        {
             "name": "LR5-66HPH-505M",
             "width": 44.6457,
             "height": 82.4409
+        },
+        {
+            "name": "LR5-72HBD-540M",
+            "width": 44.6063,
+            "height": 88.8189
         }
     ],
     "rails": [
