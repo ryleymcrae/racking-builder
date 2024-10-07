@@ -8,6 +8,7 @@ from customtkinter import (
     CTkOptionMenu,
     CTkScrollableFrame,
     CTkTabview,
+    CTkCheckBox,
 )
 
 from data_manager import DataManager
@@ -74,6 +75,8 @@ class InputFields:
                 )
             elif field_type is str:
                 input_widget = CTkOptionMenu(self.parent, values=["Default"])
+            elif field_type is bool:
+                input_widget = CTkCheckBox(self.parent, text="")
             else:  # Otherwise, use CTkEntry for numeric input
                 input_widget = CTkEntry(self.parent)
             units_label = CTkLabel(self.parent, text=units) if units else None
@@ -122,7 +125,7 @@ class InputField:
     def __init__(
         self,
         label,
-        input_widget: CTkEntry | CTkOptionMenu,
+        input_widget: CTkEntry | CTkOptionMenu | CTkCheckBox,
         default_value,
         variable_type,
         units_label=None,
@@ -135,7 +138,8 @@ class InputField:
         self.units_label = units_label
         self.valid_range = valid_range
         self.restore_default_value()
-        self.input_widget.configure(width=168)
+        self.label.configure(wraplength=110)
+        self.input_widget.configure(width=150)
 
     def grid(self, row):
         self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
@@ -169,7 +173,10 @@ class InputField:
             )
 
     def restore_default_value(self):
-        self.set(self.default_value)
+        if type(self.input_widget) is CTkCheckBox and self.default_value:
+            self.input_widget.select()
+        else:
+            self.set(self.default_value)
 
     def get_variable_type(self):
         return self.variable_type
@@ -180,8 +187,9 @@ class PanelInputFields(InputFields):
     # Passed to parent class and processed to create InputField instances
     _fields = {
         "panel_model": (str, "-- Select Panel --", None, None),
-        "panel_width": (float, "", "in.", (20, 60)),
+        "panel_width": (float, "", "in.", (25, 60)),
         "panel_height": (float, "", "in.", (40, 100)),
+        "panel_weight": (float, "", "lbs", (20, 100)),
     }
 
     def __init__(self, parent):
@@ -202,6 +210,9 @@ class PanelInputFields(InputFields):
                 )
                 self.inputs["panel_width"].set(
                     panel_models[i]["width"], True, self.parent
+                )
+                self.inputs["panel_weight"].set(
+                    panel_models[i]["weight"], True, self.parent
                 )
 
     def create_input_widgets(self, starting_row=0):
@@ -235,8 +246,11 @@ class RackingInputFields(InputFields):
         "pattern": (RackingPattern, str(RackingPattern.CONTINUOUS), None, None),
         "rafter_spacing": (RafterSpacing, str(RafterSpacing.SIXTEEN), "in.", None),
         "panel_spacing": (float, 0.625, "in.", (0.39, 0.7)),
-        "bracket_inset": (float, 10, "in.", (4, 16)),
+        "bracket_inset": (float, 10, "in.", (4, 12)),
         "rail_protrusion": (float, 4, "in.", (2, 6)),
+        "portrait_rail_inset": (float, 16, "in.", (0, 18)),
+        "landscape_rail_inset": (float, 10, "in.", (0, 12)),
+        "truss_structure": (bool, False, None, None)
     }
 
     def __init__(self, parent):
@@ -253,13 +267,13 @@ class RowFields:
 
     def init_row_controls(self):
         """Initialize the 'Add Row' and 'Delete Row' controls."""
-        add_row_button = CTkButton(self.parent, text="Add Row", command=self.add_row)
         delete_row_button = CTkButton(
             self.parent, text="Delete Row", command=self.delete_row
         )
+        add_row_button = CTkButton(self.parent, text="Add Row", command=self.add_row)
 
-        add_row_button.grid(row=0, column=1, padx=4, pady=8, sticky="ew")
-        delete_row_button.grid(row=0, column=0, padx=(0, 4), pady=8, sticky="ew")
+        delete_row_button.grid(row=0, column=0, padx=4, pady=8)
+        add_row_button.grid(row=0, column=1, padx=4, pady=8)
 
         self.add_row()  # Start with one row
 
@@ -290,7 +304,7 @@ class RowField:
 
     def grid(self, row):
         self.entry.grid(row=row, column=0, padx=4, pady=4)
-        self.orientation.grid(row=row, column=1, padx=(0, 4), pady=4)
+        self.orientation.grid(row=row, column=1, padx=4, pady=4)
 
     def grid_forget(self):
         self.entry.grid_forget()
