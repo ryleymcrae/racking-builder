@@ -58,25 +58,27 @@ class App(CTk):
             corner_radius=0,
             command=self.edit_data,
         )
-        self.edit_data_button.grid(row=1, column=0, padx=(0, 2), sticky="ew")
+        self.edit_data_button.grid(row=1, column=0, padx=1, pady=1, sticky="ew")
         self.restore_defaults_button = CTkButton(
             master=self.sidebar,
-            text="Restore Defaults",
+            text="Default Inputs",
             height=22,
             corner_radius=0,
             command=lambda: self.set_default_inputs(True),
         )
-        self.restore_defaults_button.grid(row=1, column=1, sticky="ew")
+        self.restore_defaults_button.grid(row=1, column=1, padx=1, pady=1, sticky="ew")
         self.get_results_button = CTkButton(
             master=self.sidebar,
             text="Get Results",
             font=("CTkDefaultFont", 13, "bold"),
-            height=30,
+            fg_color=("#36719F", "#144870"),
+            hover_color=("#325882", "#14375e"),
+            height=34,
             corner_radius=0,
             command=self.calculate_and_preview,
         )
         self.get_results_button.grid(
-            row=2, column=0, columnspan=2, pady=(2, 0), sticky="ew"
+            row=2, column=0, columnspan=2, padx=1, pady=1, sticky="ew"
         )
 
         # Preview Frame
@@ -117,9 +119,9 @@ class App(CTk):
         if self.editing_data:
             return messagebox.showwarning(
                 title="Editing in Progress",
-                message="Please finish editing data before getting results."
+                message="Please finish editing data before getting results.",
             )
-        
+
         user_inputs = {}
         try:
             # Process inputs for both panel and racking fields
@@ -127,7 +129,7 @@ class App(CTk):
             user_inputs.update(process_fields(self.racking_fields))
 
         except ValueError as e:
-            self.tabview.set("Array Information")
+            self.tabview.set("Inputs")
             return self.show_warning_dialog("Invalid Array Input", str(e))
 
         user_row_data = self.row_fields.get_row_data()
@@ -163,15 +165,32 @@ class App(CTk):
         self.editing_data = True
         self.preview_frame.grid_forget()
         self.data_frame.grid(row=0, column=1, sticky="nsew")
-        edit_data(
-            self.data_frame, self.panel_fields.load_panel_models, self.on_save_changes
-        )
+        edit_data(self.data_frame, self.on_save_changes)
 
     def on_save_changes(self):
         """Callback function to be passed to edit_data, called after saving changes."""
+        from data_manager import DataManager
+
         self.editing_data = False
         self.data_frame.grid_forget()
         self.preview_frame.grid(row=0, column=1, sticky="nsew")
+
+        current_panel = self.panel_fields.get_input("panel_model")
+        current_width = self.panel_fields.get_input("panel_width")
+        current_height = self.panel_fields.get_input("panel_height")
+        panel_names = [panel["name"] for panel in DataManager().get_panel_models()]
+
+        if current_panel not in panel_names:
+            self.panel_fields.load_panel_models(True)
+        else:
+            panel_models = DataManager().get_panel_models()
+            for i in range(len(panel_models)):
+                if current_panel == panel_models[i]["name"] and (
+                    current_width != str(panel_models[i]["width"])
+                    or current_height != str(panel_models[i]["height"])
+                ):
+                    self.panel_fields.set_panel_dimensions(current_panel)
+                    break
 
 
 if __name__ == "__main__":
