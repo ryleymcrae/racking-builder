@@ -181,7 +181,7 @@ class App(CTk):
         current_height = self.panel_fields.get_input("panel_height")
         current_weight = self.panel_fields.get_input("panel_weight")
         panel_names = [panel["name"] for panel in DataManager().get_panel_models()]
-        
+
         self.panel_fields.load_panel_models()
 
         if current_panel not in panel_names:

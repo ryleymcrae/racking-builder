@@ -18,7 +18,7 @@ def process_fields(fields):
     user_inputs = {}
     for field_name in fields.inputs.keys():
         value = fields.get_input(field_name)
-        
+
         if isinstance(value, str):
             value = value.strip()
 
@@ -90,17 +90,12 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
         mount_spacing = (48 // rafter_spacing) * rafter_spacing
 
         if pattern == RackingPattern.CONTINUOUS:
-            num_mounts += 2 * (
-                (row_width - 2 * bracket_inset) // mount_spacing + 2
-            )
+            num_mounts += 2 * ((row_width - 2 * bracket_inset) // mount_spacing + 2)
         else:
             num_mounts += (
-                (row_width - 2 * bracket_inset - mount_spacing / 2)
-                // mount_spacing
+                (row_width - 2 * bracket_inset - mount_spacing / 2) // mount_spacing
                 + 3  # Top row
-                + (
-                    (row_width - 2 * bracket_inset) // mount_spacing + 2
-                )  # Bottom row
+                + ((row_width - 2 * bracket_inset) // mount_spacing + 2)  # Bottom row
             )
 
         rail_counts, num_splices, waste, rails = optimal_rail_selection(
@@ -204,7 +199,7 @@ def get_psf_data(row_data, user_inputs):
             footprint_height = panel_height - 2 * portrait_rail_inset
 
         footprint_width = row_width - 2 * bracket_inset
-        
+
         if truss_structure:
             footprint_area = (footprint_width + 78.7402) * (footprint_height + 78.7402)
         else:
