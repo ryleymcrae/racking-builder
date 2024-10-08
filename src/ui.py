@@ -2,13 +2,13 @@ from typing import Dict
 
 from customtkinter import (
     CTkButton,
+    CTkCheckBox,
     CTkEntry,
     CTkFrame,
     CTkLabel,
     CTkOptionMenu,
     CTkScrollableFrame,
     CTkTabview,
-    CTkCheckBox,
 )
 
 from data_manager import DataManager
@@ -86,7 +86,7 @@ class InputFields:
 
     def create_input_widgets(self, label, starting_row=0):
         """Creates all input widgets and sets them in the parent frame."""
-        CTkLabel(self.parent, text=label).grid(
+        CTkLabel(self.parent, text=label, font=("TkDefaultFont", 12, "bold")).grid(
             row=starting_row,
             column=0,
             columnspan=3,
@@ -250,7 +250,7 @@ class RackingInputFields(InputFields):
         "rail_protrusion": (float, 4, "in.", (2, 6)),
         "portrait_rail_inset": (float, 16, "in.", (0, 18)),
         "landscape_rail_inset": (float, 10, "in.", (0, 12)),
-        "truss_structure": (bool, False, None, None)
+        "truss_structure": (bool, False, None, None),
     }
 
     def __init__(self, parent):

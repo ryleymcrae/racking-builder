@@ -63,8 +63,14 @@ def update_results(results_frame, equipment_data, psf_data):
 
     row = 0
 
-    hardware_label = CTkLabel(results_frame, text="Equipment")
-    hardware_label.grid(row=row, columnspan=2)
+    hardware_label = CTkLabel(
+        results_frame, text="Equipment", anchor="w", font=("TkDefaultFont", 12, "bold")
+    )
+    hardware_label.grid(row=row, column=0, padx=8, sticky="w")
+    hardware_label = CTkLabel(
+        results_frame, text="Count", anchor="e", font=("TkDefaultFont", 12, "bold")
+    )
+    hardware_label.grid(row=row, column=1, padx=8, sticky="e")
     CTkFrame(results_frame, height=2).grid(
         row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
     )
@@ -93,8 +99,17 @@ def update_results(results_frame, equipment_data, psf_data):
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
-    row_lengths_label = CTkLabel(results_frame, text="Rows")
-    row_lengths_label.grid(row=row, columnspan=2, pady=(16, 0))
+    row_lengths_label = CTkLabel(
+        results_frame, text="Rows", anchor="w", font=("TkDefaultFont", 12, "bold")
+    )
+    row_lengths_label.grid(row=row, column=0, padx=8, pady=(16, 0), sticky="w")
+    row_lengths_label = CTkLabel(
+        results_frame,
+        text="Deadload / Width",
+        anchor="e",
+        font=("TkDefaultFont", 12, "bold"),
+    )
+    row_lengths_label.grid(row=row, column=1, padx=8, pady=(16, 0), sticky="e")
     CTkFrame(results_frame, height=2).grid(
         row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
     )
@@ -113,9 +128,7 @@ def update_results(results_frame, equipment_data, psf_data):
     all_rails = equipment_data["all_rails"]
     all_wastes = equipment_data["all_wastes"]
     for i, length in enumerate(row_lengths):
-        label = CTkLabel(
-            row_lengths_frame, text=f"Row {i+1}", font=("TkDefaultFont", 12, "bold")
-        )
+        label = CTkLabel(row_lengths_frame, text=f"Row {i+1}")
         label.grid(row=i * 2, column=0, padx=8, sticky="w")
         value_label = CTkLabel(row_lengths_frame, text=f'{psf_data[i]} psf / {length}"')
         value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
@@ -163,7 +176,8 @@ def edit_data(preview_frame, save_changes_callback):
             try:
                 if panel["name"] == "":
                     return messagebox.showwarning(
-                        preview_frame.winfo_toplevel().title(), f"Panel name cannot be empty."
+                        preview_frame.winfo_toplevel().title(),
+                        f"Panel name cannot be empty.",
                     )
                 panel["width"] = float(panel["width"])
                 panel["height"] = float(panel["height"])
@@ -206,7 +220,8 @@ def edit_data(preview_frame, save_changes_callback):
         """Delete the panel at the given index, but warn if only 1 panel is left."""
         if len(data_manager.data["panel_models"]) == 1:
             messagebox.showwarning(
-                preview_frame.winfo_toplevel().title(), "There must be at least one panel in the list."
+                preview_frame.winfo_toplevel().title(),
+                "There must be at least one panel in the list.",
             )
         else:
             data_manager.delete_panel_model(index)
@@ -228,7 +243,8 @@ def edit_data(preview_frame, save_changes_callback):
         """Delete the rail at the given index, but warn if only 1 rail is left."""
         if len(data_manager.data["rails"]) == 1:
             messagebox.showwarning(
-                preview_frame.winfo_toplevel().title(), "There must be at least one rail in the list."
+                preview_frame.winfo_toplevel().title(),
+                "There must be at least one rail in the list.",
             )
         else:
             data_manager.delete_rail(index)
