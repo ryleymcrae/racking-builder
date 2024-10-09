@@ -93,19 +93,19 @@ def update_results(results_frame, equipment_data, psf_data):
         row += 1
 
     for rail_length, count in equipment_data["num_rails"].items():
-        label = CTkLabel(results_frame, text=f'{rail_length}" Rail')
+        label = CTkLabel(results_frame, text=f'{rail_length:g}" Rail')
         label.grid(row=row, column=0, padx=8, sticky="w")
         value_label = CTkLabel(results_frame, text=str(count))
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
     row_lengths_label = CTkLabel(
-        results_frame, text="Rows", anchor="w", font=("TkDefaultFont", 12, "bold")
+        results_frame, text="Rows / Rail Counts", anchor="w", font=("TkDefaultFont", 12, "bold")
     )
     row_lengths_label.grid(row=row, column=0, padx=8, pady=(16, 0), sticky="w")
     row_lengths_label = CTkLabel(
         results_frame,
-        text="Deadload / Width",
+        text="Deadload / Width / Cutoffs",
         anchor="e",
         font=("TkDefaultFont", 12, "bold"),
     )
@@ -116,11 +116,7 @@ def update_results(results_frame, equipment_data, psf_data):
     row += 2
 
     results_frame.grid_rowconfigure(row, weight=1)
-    row_lengths_frame = (
-        CTkScrollableFrame(results_frame, fg_color="transparent")
-        if len(equipment_data["row_lengths"]) > 5
-        else CTkFrame(results_frame, fg_color="transparent")
-    )
+    row_lengths_frame = CTkScrollableFrame(results_frame, fg_color="transparent")
     row_lengths_frame.grid(row=row, column=0, columnspan=2, sticky="nsew")
     row_lengths_frame.grid_columnconfigure(1, weight=1)
 
@@ -135,7 +131,11 @@ def update_results(results_frame, equipment_data, psf_data):
         rails_label = CTkLabel(
             row_lengths_frame,
             text=" ".join(
-                [f'{length}": {count}' for length, count in all_rails[i].items()]
+                [
+                    f'{length:g}": {count}'
+                    for length, count in all_rails[i].items()
+                    if count != 0
+                ]
             ),
             anchor="w",
             font=("TkDefaultFont", 10),
@@ -144,7 +144,7 @@ def update_results(results_frame, equipment_data, psf_data):
         rails_label.grid(row=i * 2 + 1, column=0, padx=8, pady=(0, 4), sticky="w")
         waste_label = CTkLabel(
             row_lengths_frame,
-            text=f'Waste: {all_wastes[i]}"',
+            text=f'2 x {all_wastes[i]/2}" cutoffs',
             anchor="e",
             font=("TkDefaultFont", 10),
             height=20,
@@ -191,7 +191,7 @@ def edit_data(preview_frame, save_changes_callback):
         # Convert rail lengths to floats
         for i in range(len(data_manager.data["rails"])):
             try:
-                data_manager.data["rails"][i] = int(data_manager.data["rails"][i])
+                data_manager.data["rails"][i] = float(data_manager.data["rails"][i])
             except ValueError:
                 return messagebox.showwarning(
                     preview_frame.winfo_toplevel().title(),
