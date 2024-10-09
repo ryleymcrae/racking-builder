@@ -127,55 +127,44 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     return equipment
 
 
-def optimal_rail_selection(rail_length, available_rails):
+def optimal_rail_selection(required_rail_length, available_rails):
     from itertools import combinations_with_replacement
 
-    best_combination = None  # To store the best combination found
-    least_waste = float("inf")  # Start with a large value for least waste
-    best_splices = 0  # To store the number of splices for the best combination
-    rail_length *= 2  # Multiply by 2 for both rows
+    rail_combo = []  # To store the best combination found
+    min_rail_length = min(available_rails)
 
-    # Helper function to calculate splices
-    def calculate_splices(rail_combo):
-        n = len(rail_combo)
-        if n < 3:
-            return 0
-        else:
-            return (
-                (n - 1) // 2
-            ) * 2  # Add 2 splices for every two rails after the first
+    for rail_length in sorted(available_rails, reverse=True):
+        if required_rail_length > rail_length - min_rail_length:
+            main_rail_length = rail_length
+            break
+    else:
+        main_rail_length = min_rail_length
 
-    # Function to calculate the rail waste for a given pattern
-    def calculate_waste(rails, length_needed):
-        total_length = sum(rails)
-        waste = total_length - length_needed
-        return waste if waste >= 0 else float("inf")
+    remaining_length = required_rail_length
+    while remaining_length >= main_rail_length + min_rail_length:
+        rail_combo.append(main_rail_length)
+        remaining_length -= main_rail_length
 
-    # Generate combinations of available rails
-    def generate_combinations():
-        combinations = []
-        for i in range(1, int(rail_length // min(available_rails)) + 3):
-            for combo in combinations_with_replacement(available_rails, i):
-                combinations.append(list(combo))
-        return combinations
+    best_last_rail_lengths = []
+    min_waste = float("inf")
 
-    # Try all combinations and compute the waste for both rows
-    for combo in generate_combinations():
-        waste = calculate_waste(combo, rail_length)
+    for i in range(1, len(available_rails) + 1):
+        for combo in combinations_with_replacement(available_rails, i):
+            combo_length = sum(combo)
+            if combo_length >= remaining_length:
+                waste = combo_length - remaining_length
+                if waste < min_waste:
+                    min_waste = waste
+                    best_last_rail_lengths = combo
 
-        if waste != float("inf"):
-            splices = calculate_splices(combo)
+    rail_combo.extend(best_last_rail_lengths)
 
-            # If this configuration has less waste, update the best combination
-            if waste < least_waste:
-                least_waste = waste
-                best_combination = combo
-                best_splices = splices
-
-    rail_counts = {length: best_combination.count(length) for length in available_rails}
+    rail_counts = {length: rail_combo.count(length) * 2 for length in available_rails}
+    num_splices = 0 if len(rail_combo) < 2 else (len(rail_combo) - 1) * 2
+    total_waste = min_waste * 2
 
     # Return the best combination and the number of splices
-    return rail_counts, best_splices, least_waste, best_combination
+    return rail_counts, num_splices, total_waste, rail_combo
 
 
 def get_psf_data(row_data, user_inputs):
