@@ -1,12 +1,6 @@
 {
     "panel_models": [
         {
-            "name": "CS7N",
-            "width": 51.2992,
-            "height": 93.8583,
-            "weight": 83.3347
-        },
-        {
             "name": "LR5-54HPB-405M",
             "width": 44.6457,
             "height": 67.7953,
@@ -23,6 +17,12 @@
             "width": 44.6063,
             "height": 88.8189,
             "weight": 71.2092
+        },
+        {
+            "name": "LR7-54HGBB-450M",
+            "width": 44.6457,
+            "height": 70.8661,
+            "weight": 52.029
         }
     ],
     "rails": [
