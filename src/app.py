@@ -184,7 +184,10 @@ class App(CTk):
 
         self.panel_fields.load_panel_models()
 
-        if current_panel not in panel_names:
+        if (
+            current_panel not in panel_names
+            and current_panel != self.panel_fields.inputs["panel_model"].default_value
+        ):
             self.panel_fields.inputs["panel_model"].restore_default_value()
             self.panel_fields.inputs["panel_width"].restore_default_value()
             self.panel_fields.inputs["panel_height"].restore_default_value()
