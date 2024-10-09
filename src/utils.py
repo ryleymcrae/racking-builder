@@ -134,7 +134,7 @@ def optimal_rail_selection(required_rail_length, available_rails):
     min_rail_length = min(available_rails)
 
     for rail_length in sorted(available_rails, reverse=True):
-        if required_rail_length > rail_length - min_rail_length:
+        if required_rail_length > rail_length + min_rail_length:
             main_rail_length = rail_length
             break
     else:
