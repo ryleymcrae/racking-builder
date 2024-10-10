@@ -100,7 +100,10 @@ def update_results(results_frame, equipment_data, psf_data):
         row += 1
 
     row_lengths_label = CTkLabel(
-        results_frame, text="Rows / Rail Counts", anchor="w", font=("TkDefaultFont", 12, "bold")
+        results_frame,
+        text="Rows / Rail Counts",
+        anchor="w",
+        font=("TkDefaultFont", 12, "bold"),
     )
     row_lengths_label.grid(row=row, column=0, padx=8, pady=(16, 0), sticky="w")
     row_lengths_label = CTkLabel(
