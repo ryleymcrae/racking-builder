@@ -21,7 +21,7 @@ class DataManager:
 
     def get_file_path(self, file_name):
         """Determine the correct file path for data.json in the AppData folder."""
-        appdata_dir = os.path.join(os.path.expanduser("~"), "AppData", "Roaming")
+        appdata_dir = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "Racking Builder")
         return os.path.join(appdata_dir, file_name)
 
     def load_data(self):
