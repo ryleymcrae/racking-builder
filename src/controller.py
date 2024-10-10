@@ -347,7 +347,7 @@ def edit_data(preview_frame, save_changes_callback):
         # Populate rail data with editable fields
         for i, rail in enumerate(data_manager.data["rails"]):
             rail_entry = CTkEntry(rail_frame)
-            rail_entry.insert(0, f"{rail:g}" if rail != "" else rail)
+            rail_entry.insert(0, f"{rail:g}" if isinstance(rail, float) else rail)
             rail_entry.grid(row=i + 1, column=0, padx=(8, 4), pady=4)
             rail_entry.bind(
                 "<KeyRelease>",
