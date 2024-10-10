@@ -21,9 +21,11 @@ class DataManager:
 
     def get_file_path(self, file_name):
         """Determine the correct file path for data.json."""
-        if getattr(sys, "_MEIPASS", False):
-            # PyInstaller bundle (extracted temp directory)
-            return os.path.join(sys._MEIPASS, file_name)
+        if getattr(sys, "frozen", False):  # Check if running as a bundled executable
+            # Use a writable directory for the bundled application
+            app_data_dir = os.path.join(os.path.expanduser("~"), "YourAppName")
+            os.makedirs(app_data_dir, exist_ok=True)  # Create the directory if it doesn't exist
+            return os.path.join(app_data_dir, file_name)
         else:
             # Normal script execution (development mode)
             return os.path.join(os.path.dirname(__file__), file_name)
