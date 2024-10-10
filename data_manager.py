@@ -20,20 +20,36 @@ class DataManager:
             self._initialized = True
 
     def get_file_path(self, file_name):
-        """Determine the correct file path for data.json."""
-        if getattr(sys, "frozen", False):  # Check if running as a bundled executable
-            # Use a writable directory for the bundled application
-            app_data_dir = os.path.join(os.path.expanduser("~"), "YourAppName")
-            os.makedirs(app_data_dir, exist_ok=True)  # Create the directory if it doesn't exist
-            return os.path.join(app_data_dir, file_name)
-        else:
-            # Normal script execution (development mode)
-            return os.path.join(os.path.dirname(__file__), file_name)
+        """Determine the correct file path for data.json in the AppData folder."""
+        appdata_dir = os.path.join(os.path.expanduser("~"), "AppData", "Roaming")
+        return os.path.join(appdata_dir, file_name)
 
     def load_data(self):
-        """Load data from JSON."""
+        """Load data from JSON, creating the file with default data if it doesn't exist."""
+        if not os.path.exists(self.file_path):
+            # Create default data if the file doesn't exist
+            self.copy_default_data()
+        
+        # Load the data from the file
         with open(self.file_path) as f:
             return load(f)
+
+    def copy_default_data(self):
+        """Copy the default data.json from MEIPASS to the AppData folder."""
+        if getattr(sys, "frozen", False):
+            # Running in a PyInstaller bundle
+            source_path = os.path.join(sys._MEIPASS, self._file_name)
+        else:
+            # Running in a normal script execution
+            source_path = os.path.join(os.path.dirname(__file__), self._file_name)
+        
+        # Ensure the AppData directory exists
+        os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
+        
+        # Copy the file to the AppData directory
+        with open(source_path, 'rb') as src_file:
+            with open(self.file_path, 'wb') as dest_file:
+                dest_file.write(src_file.read())
 
     def save_data(self):
         """Save sorted data to JSON."""
@@ -67,3 +83,4 @@ class DataManager:
 
     def update_rail(self, index, length):
         self.data["rails"][index] = length
+
