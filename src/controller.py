@@ -46,6 +46,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             xwidth = panel_width  # Normal width for portrait
             yheight = panel_height  # Normal height for portrait
 
+        CTkLabel(row_frame, text=str(row_num + 1)).pack(side=LEFT, padx=(4, 8))
         for _ in range(num_panels):
             CTkFrame(
                 row_frame,
