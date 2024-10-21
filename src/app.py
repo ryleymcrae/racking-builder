@@ -2,10 +2,10 @@ from tkinter import messagebox
 
 from customtkinter import CTk, CTkButton, CTkFrame, CTkScrollableFrame
 
-from controller import edit_data, update_preview_frame, update_results
+from controller import *
 from ui import PanelInputFields, RackingInputFields, RowFields, TabView
 from utils import *
-
+from data_manager import DataManager
 
 class App(CTk):
     TITLE = "Racking Builder"
@@ -20,6 +20,7 @@ class App(CTk):
         self.row_fields = None
         self.tabview = None
         self.editing_data = False
+        self.data_manager = DataManager()
         # Setup
         self.build_ui()
         self.init_inputs()
@@ -151,11 +152,15 @@ class App(CTk):
 
         update_preview_frame(self.preview_frame, row_data, user_inputs)
 
-        equipment_data = get_equipment_data(row_data, user_inputs)
+        rail_lengths = self.data_manager.get_rails()
+        rail_data = get_row_data(row_data, rail_lengths, user_inputs)
+        equipment_data = get_equipment_data(row_data, rail_lengths, user_inputs)
+        equipment_data.update({"total_waste": f'{round(sum(rail_data["all_wastes"]), 2)}"'})
         psf_data = get_psf_data(row_data, user_inputs)
 
-        update_results(self.tabview.get_results_frame(), equipment_data, psf_data)
-        self.tabview.set("Results")
+        update_equipment_results(self.tabview.get_equipment_results_frame(), equipment_data)
+        update_rail_results(self.tabview.get_rail_results_frame(), rail_data, psf_data)
+        self.tabview.set("Hardware")
 
     def show_warning_dialog(self, title, message):
         messagebox.showwarning(title, message)

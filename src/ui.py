@@ -16,11 +16,12 @@ from enums import *
 
 
 class TabView(CTkTabview):
-    _tab_names = ["Inputs", "Rows", "Results"]
+    _tab_names = ["Inputs", "Rows", "Hardware", "Rails"]
+    # _results_tab_names = ["Equipment", "Rows"]
 
-    def __init__(self, master, width=326, fg_color="transparent"):
+    def __init__(self, master, width=306, fg_color="transparent", corner_radius=0):
         """Initialize the TabView with tabs and associated frames."""
-        super().__init__(master=master, width=width, fg_color=fg_color)
+        super().__init__(master=master, width=width, fg_color=fg_color, corner_radius=corner_radius)
         self.grid(row=0, column=0, sticky="nsew")
 
         # Configure each tab
@@ -34,14 +35,19 @@ class TabView(CTkTabview):
         self.input_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
 
         # Row frame in the second tab
-        self.row_frame = CTkScrollableFrame(master=self.tab("Rows"), corner_radius=0)
+        self.row_frame = CTkFrame(master=self.tab("Rows"))
         self.row_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
 
-        self.results_frame = CTkFrame(master=self.tab("Results"))
-        self.results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
-        self.results_frame.grid_columnconfigure(1, weight=1)
+        self.equipment_results_frame = CTkFrame(master=self.tab("Hardware"))
+        self.equipment_results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+        self.equipment_results_frame.grid_columnconfigure(1, weight=1)
+        
+        self.rail_results_frame = CTkFrame(master=self.tab("Rails"))
+        self.rail_results_frame.grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+        self.rail_results_frame.grid_columnconfigure(1, weight=1)
 
-        CTkLabel(self.results_frame, text="Nothing to show yet").pack(pady=(10, 0))
+        CTkLabel(self.get_equipment_results_frame(), text="Nothing to show yet").pack(pady=(10, 0))
+        CTkLabel(self.get_rail_results_frame(), text="Nothing to show yet").pack(pady=(10, 0))
 
     def get_input_frame(self):
         """Return the input frame for external use."""
@@ -51,9 +57,14 @@ class TabView(CTkTabview):
         """Return the row frame for external use."""
         return self.row_frame
 
-    def get_results_frame(self):
+    def get_equipment_results_frame(self):
         """Return the results frame for external use."""
-        return self.results_frame
+        return self.equipment_results_frame
+
+    def get_rail_results_frame(self):
+        """Return the rail results frame for external use."""
+        return self.rail_results_frame
+
 
 
 class InputFields:
@@ -86,19 +97,20 @@ class InputFields:
 
     def create_input_widgets(self, label, starting_row=0):
         """Creates all input widgets and sets them in the parent frame."""
-        CTkLabel(self.parent, text=label, font=("TkDefaultFont", 12, "bold")).grid(
+        CTkLabel(self.parent, text=label, font=("TkDefaultFont", 12, "bold"), height=20).grid(
             row=starting_row,
             column=0,
             columnspan=3,
+            padx=8,
             pady=0 if starting_row == 0 else (16, 0),
             sticky="ew",
         )
-        CTkFrame(self.parent, height=2).grid(
+        CTkFrame(self.parent, height=2, fg_color="gray50").grid(
             row=starting_row + 1,
             column=0,
             columnspan=3,
             padx=8,
-            pady=(0, 4),
+            pady=4,
             sticky="nsew",
         )
         for idx, (key, field) in enumerate(self.inputs.items()):
@@ -142,10 +154,10 @@ class InputField:
         self.input_widget.configure(width=150)
 
     def grid(self, row):
-        self.label.grid(row=row, column=0, padx=8, pady=4, sticky="w")
+        self.label.grid(row=row, column=0, padx=(16, 8), pady=4, sticky="w")
         self.input_widget.grid(row=row, column=1, padx=8, pady=4, sticky="w")
         if self.units_label:
-            self.units_label.grid(row=row, column=2, padx=8, pady=4, sticky="ew")
+            self.units_label.grid(row=row, column=2, padx=(0, 4), pady=4, sticky="ew")
 
     def get(self):
         return self.input_widget.get()
@@ -272,16 +284,21 @@ class RowFields:
         )
         add_row_button = CTkButton(self.parent, text="Add Row", command=self.add_row)
 
-        delete_row_button.grid(row=0, column=0, padx=4, pady=8)
-        add_row_button.grid(row=0, column=1, padx=4, pady=8)
+        delete_row_button.grid(row=0, column=0, padx=(8, 4), pady=(0, 8))
+        add_row_button.grid(row=0, column=1, padx=(4, 8), pady=(0, 8))
+
+        self.parent.grid_rowconfigure(1, weight=1)
+        self.parent.grid_columnconfigure(1, weight=1)
+        self.rows_frame = CTkScrollableFrame(self.parent, fg_color="transparent", corner_radius=0)
+        self.rows_frame.grid(row=1, column=0, columnspan=2, pady=(0, 2), sticky="nsew")
 
         self.add_row()  # Start with one row
 
     def add_row(self):
         """Add a new row to the row builder."""
-        row = RowField(self.parent)
+        row = RowField(self.rows_frame, len(self.rows))
+        row.grid()
         self.rows.append(row)
-        row.grid(len(self.rows))
 
     def delete_row(self):
         """Remove the last row from the row builder."""
@@ -298,15 +315,19 @@ class RowFields:
 
 
 class RowField:
-    def __init__(self, parent):
-        self.entry = CTkEntry(parent)
-        self.orientation = CTkOptionMenu(parent, values=["Portrait", "Landscape"])
+    def __init__(self, parent, row_num):
+        self.row_num = row_num
+        self.label = CTkLabel(parent, text=row_num + 1, width=14)
+        self.entry = CTkEntry(parent, width=118)
+        self.orientation = CTkOptionMenu(parent, width=130, values=["Portrait", "Landscape"])
 
-    def grid(self, row):
-        self.entry.grid(row=row, column=0, padx=4, pady=4)
-        self.orientation.grid(row=row, column=1, padx=4, pady=4)
+    def grid(self):
+        self.label.grid(row=self.row_num, column=0, padx=(8, 4), pady=4)
+        self.entry.grid(row=self.row_num, column=1, padx=4, pady=4)
+        self.orientation.grid(row=self.row_num, column=2, padx=4, pady=4)
 
     def grid_forget(self):
+        self.label.grid_forget()
         self.entry.grid_forget()
         self.orientation.grid_forget()
 

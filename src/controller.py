@@ -46,7 +46,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             xwidth = panel_width  # Normal width for portrait
             yheight = panel_height  # Normal height for portrait
 
-        CTkLabel(row_frame, text=str(row_num + 1)).pack(side=LEFT, padx=(4, 8))
+        CTkLabel(row_frame, text=str(row_num + 1), width=14).pack(side=LEFT, padx=(0, 8))
         for _ in range(num_panels):
             CTkFrame(
                 row_frame,
@@ -58,22 +58,22 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             ).pack(side=LEFT, pady=(0, 2))
 
 
-def update_results(results_frame, equipment_data, psf_data):
-    for child in results_frame.winfo_children():
+def update_equipment_results(equipment_results_frame, equipment_data):
+    for child in equipment_results_frame.winfo_children():
         child.destroy()
 
     row = 0
 
     hardware_label = CTkLabel(
-        results_frame, text="Equipment", anchor="w", font=("TkDefaultFont", 12, "bold")
+        equipment_results_frame, text="Hardware", anchor="w", font=("TkDefaultFont", 12, "bold"), height=20
     )
     hardware_label.grid(row=row, column=0, padx=8, sticky="w")
     hardware_label = CTkLabel(
-        results_frame, text="Count", anchor="e", font=("TkDefaultFont", 12, "bold")
+        equipment_results_frame, text="Count", anchor="e", font=("TkDefaultFont", 12, "bold"), height=20
     )
     hardware_label.grid(row=row, column=1, padx=8, sticky="e")
-    CTkFrame(results_frame, height=2).grid(
-        row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
+    CTkFrame(equipment_results_frame, height=2, fg_color="gray50").grid(
+        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
     )
     row += 2
 
@@ -87,73 +87,109 @@ def update_results(results_frame, equipment_data, psf_data):
             "total_waste": "Total Waste",
         }.items()
     ):
-        label = CTkLabel(results_frame, text=key.split("_")[1].capitalize())
+        label = CTkLabel(equipment_results_frame, text=key.split("_")[1].capitalize())
         label.grid(row=row, column=0, padx=8, sticky="w")
-        value_label = CTkLabel(results_frame, text=f"{equipment_data[key]}")
+        value_label = CTkLabel(equipment_results_frame, text=f"{equipment_data[key]}")
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
     for rail_length, count in equipment_data["num_rails"].items():
-        label = CTkLabel(results_frame, text=f'{rail_length:g}" Rail')
+        label = CTkLabel(equipment_results_frame, text=f'{rail_length:g}" Rail')
         label.grid(row=row, column=0, padx=8, sticky="w")
-        value_label = CTkLabel(results_frame, text=str(count))
+        value_label = CTkLabel(equipment_results_frame, text=str(count))
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
-    row_lengths_label = CTkLabel(
-        results_frame,
-        text="Rows / Rail Counts",
-        anchor="w",
-        font=("TkDefaultFont", 12, "bold"),
-    )
-    row_lengths_label.grid(row=row, column=0, padx=8, pady=(16, 0), sticky="w")
-    row_lengths_label = CTkLabel(
-        results_frame,
-        text="Deadload / Width / Cutoffs",
-        anchor="e",
-        font=("TkDefaultFont", 12, "bold"),
-    )
-    row_lengths_label.grid(row=row, column=1, padx=8, pady=(16, 0), sticky="e")
-    CTkFrame(results_frame, height=2).grid(
-        row=row + 1, columnspan=2, padx=8, pady=(0, 4), sticky="ew"
-    )
-    row += 2
 
-    results_frame.grid_rowconfigure(row, weight=1)
-    row_lengths_frame = CTkScrollableFrame(results_frame, fg_color="transparent")
-    row_lengths_frame.grid(row=row, column=0, columnspan=2, sticky="nsew")
-    row_lengths_frame.grid_columnconfigure(1, weight=1)
+def update_rail_results(rail_results_frame, rail_data, psf_data):
+    for child in rail_results_frame.winfo_children():
+        child.destroy()
 
-    row_lengths = equipment_data["row_lengths"]
-    all_rails = equipment_data["all_rails"]
-    all_wastes = equipment_data["all_wastes"]
+    row_lengths_frame = CTkScrollableFrame(rail_results_frame, height=568, fg_color="transparent")
+    row_lengths_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    row_lengths_frame.grid_columnconfigure(0, weight=1)
+
+    row_lengths = rail_data["row_lengths"]
+    all_rails = rail_data["all_rails"]
+    all_wastes = rail_data["all_wastes"]
     for i, length in enumerate(row_lengths):
-        label = CTkLabel(row_lengths_frame, text=f"Row {i+1}")
-        label.grid(row=i * 2, column=0, padx=8, sticky="w")
-        value_label = CTkLabel(row_lengths_frame, text=f'{psf_data[i]} psf / {length}"')
-        value_label.grid(row=i * 2, column=1, padx=8, sticky="e")
-        rails_label = CTkLabel(
-            row_lengths_frame,
+        frame = CTkFrame(row_lengths_frame, fg_color="transparent", height=0, corner_radius=0)
+        frame.grid_columnconfigure(2, weight=1)
+        frame.grid(row=i, column=0, sticky="ew")
+        # Row number
+        label = CTkLabel(frame, width=14, text=i+1)
+        label.grid(row=0, column=0, rowspan=4, padx=(0, 8), sticky="w")
+        # Row 0
+        CTkLabel(
+            frame,             
+            text=f"Rail Length:",
+            anchor="w",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=0, column=1, sticky="w")
+        CTkLabel(
+            frame,
+            text=f'{length}"', 
+            anchor="e",
+            font=("TkDefaultFont", 11),
+            height=20,    
+        ).grid(row=0, column=2, padx=4, sticky="e")
+        # Row 1
+        CTkLabel(
+            frame,
+            text="Rails:",
+            anchor="w",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=1, column=1, sticky="w")
+        CTkLabel(
+            frame,
             text=" ".join(
                 [
                     f'{length:g}": {count}'
-                    for length, count in all_rails[i].items()
+                    for length, count in sorted(all_rails[i].items(), reverse=True)
                     if count != 0
                 ]
             ),
-            anchor="w",
-            font=("TkDefaultFont", 10),
-            height=20,
-        )
-        rails_label.grid(row=i * 2 + 1, column=0, padx=8, pady=(0, 4), sticky="w")
-        waste_label = CTkLabel(
-            row_lengths_frame,
-            text=f'2 x {all_wastes[i]/2}" cutoffs',
             anchor="e",
-            font=("TkDefaultFont", 10),
+            font=("TkDefaultFont", 11),
             height=20,
-        )
-        waste_label.grid(row=i * 2 + 1, column=1, padx=8, pady=(0, 4), sticky="e")
+        ).grid(row=1, column=2, padx=4, sticky="e")
+        # Row 2
+        CTkLabel(
+            frame,
+            text="Cutoffs:",
+            anchor="w",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=2, column=1, sticky="w")
+        CTkLabel(
+            frame,
+            text=f'2 x {all_wastes[i]/2}"',
+            anchor="e",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=2, column=2, padx=4, sticky="e")
+        # Row 3
+        CTkLabel(
+            frame,
+            text="Deadload:",
+            anchor="w",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=3, column=1, sticky="w")
+        CTkLabel(
+            frame,
+            text=f"{psf_data[i]} psf",
+            anchor="e",
+            font=("TkDefaultFont", 11),
+            height=20,
+        ).grid(row=3, column=2, padx=4, sticky="e")
+        # Separator
+        if i < len(row_lengths) - 1:
+            CTkFrame(frame, height=2, fg_color="gray50").grid(
+                row=4, columnspan=3, padx=4, pady=4, sticky="ew"
+            )
 
 
 def edit_data(preview_frame, save_changes_callback):
