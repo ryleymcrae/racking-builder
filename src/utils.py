@@ -1,7 +1,7 @@
 import os
 import sys
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 def get_icon_path():
@@ -49,25 +49,19 @@ def process_fields(fields):
     return user_inputs
 
 
-def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
-    from data_manager import DataManager
+def get_equipment_data(row_data: List[Tuple[int, str]], rail_lengths, user_inputs) -> Dict[str, int]:
+    """Calculate and return the required solar equipment quantities."""
     from enums import RackingPattern
-
-    data_manager = DataManager()
-
-    rail_lengths = data_manager.get_rails()
-    num_rails = {length: 0 for length in rail_lengths}
-
+    
+    # Initialize equipment-related variables
     num_panels_total = 0
     num_mounts = 0
     num_mids = 0
     num_ends = 0
     num_splices_total = 0
-    total_waste = 0
-    all_wastes = []
-    all_rails = []
-    row_lengths = []
+    num_rails = {length: 0 for length in rail_lengths}
 
+    # Extract user inputs
     panel_width = user_inputs["panel_width"]
     panel_height = user_inputs["panel_height"]
     panel_spacing = user_inputs["panel_spacing"]
@@ -76,11 +70,13 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
     pattern = user_inputs["pattern"]
     bracket_inset = user_inputs["bracket_inset"]
 
-    for i, (num_panels, orientation) in enumerate(row_data):
+    # Loop over row data and compute equipment quantities
+    for num_panels, orientation in row_data:
         num_panels_total += num_panels
         num_ends += 4
         num_mids += 2 * (num_panels - 1)
 
+        # Calculate row width based on panel orientation
         if orientation == "Landscape":
             row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
         else:
@@ -98,33 +94,137 @@ def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
                 + ((row_width - 2 * bracket_inset) // mount_spacing + 2)  # Bottom row
             )
 
-        rail_counts, num_splices, waste, rails = optimal_rail_selection(
-            rail_length, rail_lengths
-        )
+        rail_counts, num_splices, _, _ = optimal_rail_selection(rail_length, rail_lengths)
 
-        # Update the total count of rails used
+        # Update rail counts and splices
         for rail_length, count in rail_counts.items():
             num_rails[rail_length] += count
-
         num_splices_total += num_splices
-        total_waste += waste
-        all_wastes.append(round(waste, 2))
-        all_rails.append(rail_counts)
-        row_lengths.append(round(row_width, 2))
 
+    # Return the calculated equipment quantities
     equipment = {
         "num_modules": num_panels_total,
         "num_rails": num_rails,
         "num_mounts": int(num_mounts),
         "num_mids": num_mids,
         "num_ends": num_ends,
-        "num_splices": num_splices_total,
-        "total_waste": f'{round(total_waste, 2)}"',
-        "row_lengths": row_lengths,
-        "all_rails": all_rails,
-        "all_wastes": all_wastes,
+        "num_splices": num_splices_total
     }
     return equipment
+
+
+def get_row_data(row_data: List[Tuple[int, str]], rail_lengths, user_inputs) -> Dict[str, List[float]]:
+    """Calculate the row lengths, rails, and wastes."""
+    row_lengths = []
+    all_rails = []
+    all_wastes = []
+
+    # Extract user inputs
+    panel_width = user_inputs["panel_width"]
+    panel_height = user_inputs["panel_height"]
+    panel_spacing = user_inputs["panel_spacing"]
+    rail_protrusion = user_inputs["rail_protrusion"]
+
+    # Loop over row data to compute row lengths, rails, and wastes
+    for num_panels, orientation in row_data:
+        # Calculate row width based on panel orientation
+        if orientation == "Landscape":
+            row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
+        else:
+            row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
+
+        rail_length = row_width + 2 * rail_protrusion
+        rail_counts, _, waste, _ = optimal_rail_selection(rail_length, rail_lengths)
+
+        # Store calculated values for each row
+        row_lengths.append(round(rail_length, 2))
+        all_rails.append(rail_counts)
+        all_wastes.append(round(waste, 2))
+
+    # Return the calculated row data
+    row_data_results = {
+        "row_lengths": row_lengths,
+        "all_rails": all_rails,
+        "all_wastes": all_wastes
+    }
+    return row_data_results
+
+# def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
+#     from data_manager import DataManager
+#     from enums import RackingPattern
+
+#     data_manager = DataManager()
+
+#     rail_lengths = data_manager.get_rails()
+#     num_rails = {length: 0 for length in rail_lengths}
+
+#     num_panels_total = 0
+#     num_mounts = 0
+#     num_mids = 0
+#     num_ends = 0
+#     num_splices_total = 0
+#     total_waste = 0
+#     all_wastes = []
+#     all_rails = []
+#     row_lengths = []
+
+#     panel_width = user_inputs["panel_width"]
+#     panel_height = user_inputs["panel_height"]
+#     panel_spacing = user_inputs["panel_spacing"]
+#     rail_protrusion = user_inputs["rail_protrusion"]
+#     rafter_spacing = float(str(user_inputs["rafter_spacing"]))
+#     pattern = user_inputs["pattern"]
+#     bracket_inset = user_inputs["bracket_inset"]
+
+#     for i, (num_panels, orientation) in enumerate(row_data):
+#         num_panels_total += num_panels
+#         num_ends += 4
+#         num_mids += 2 * (num_panels - 1)
+
+#         if orientation == "Landscape":
+#             row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
+#         else:
+#             row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
+
+#         rail_length = row_width + 2 * rail_protrusion
+#         mount_spacing = (48 // rafter_spacing) * rafter_spacing
+
+#         if pattern == RackingPattern.CONTINUOUS:
+#             num_mounts += 2 * ((row_width - 2 * bracket_inset) // mount_spacing + 2)
+#         else:
+#             num_mounts += (
+#                 (row_width - 2 * bracket_inset - mount_spacing / 2) // mount_spacing
+#                 + 3  # Top row
+#                 + ((row_width - 2 * bracket_inset) // mount_spacing + 2)  # Bottom row
+#             )
+
+#         rail_counts, num_splices, waste, rails = optimal_rail_selection(
+#             rail_length, rail_lengths
+#         )
+
+#         # Update the total count of rails used
+#         for rail_length, count in rail_counts.items():
+#             num_rails[rail_length] += count
+
+#         num_splices_total += num_splices
+#         total_waste += waste
+#         all_wastes.append(round(waste, 2))
+#         all_rails.append(rail_counts)
+#         row_lengths.append(round(row_width, 2))
+
+#     equipment = {
+#         "num_modules": num_panels_total,
+#         "num_rails": num_rails,
+#         "num_mounts": int(num_mounts),
+#         "num_mids": num_mids,
+#         "num_ends": num_ends,
+#         "num_splices": num_splices_total,
+#         "total_waste": f'{round(total_waste, 2)}"',
+#         "row_lengths": row_lengths,
+#         "all_rails": all_rails,
+#         "all_wastes": all_wastes,
+#     }
+#     return equipment
 
 
 def optimal_rail_selection(required_rail_length, available_rails):
@@ -134,7 +234,7 @@ def optimal_rail_selection(required_rail_length, available_rails):
     min_rail_length = min(available_rails)
 
     for rail_length in sorted(available_rails, reverse=True):
-        if required_rail_length > rail_length + min_rail_length:
+        if required_rail_length > rail_length + min_rail_length / 2:
             main_rail_length = rail_length
             break
     else:
