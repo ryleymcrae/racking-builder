@@ -1,6 +1,6 @@
 # Racking Builder
 
-The **Racking Builder** is a desktop tool developed in Python 3.10.5 using the [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) UI library. This application helps solar system designers determine the required hardware and optimize rail selections for a defined solar array, minimizing material waste.
+The **Racking Builder** is a desktop tool developed in Python 3.10.5 using the [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) UI library. This application helps solar system designers determine the required hardware and optimize rail selections for a defined flush-mounted rooftop solar array, minimizing material waste.
 
 The tool allows users to:
 
