@@ -39,10 +39,6 @@ Input Label | Units | Type | Description
 **Landscape rail inset** | Inches | User-defined | Set the inset distance for the side rails from the long edge of the solar panels when they are mounted in landscape orientation
 **Truss structure** | Yes / No | Checkbox | Indicate whether the roof is a truss structure. If "Yes," the application calculates the deadload considering a weight distribution extending 1 meter beyond all edges of the mounting footprint
 
-## Results
-
-
-
 ## User Interface
 
 <p align="center">
