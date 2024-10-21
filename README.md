@@ -46,31 +46,31 @@ Input Label | Units | Type | Description
 ## User Interface
 
 <p align="center">
-    <img src="images/default_screen.png" style="width:800px">
+    <img src="images/default_screen.png" style="width:600px">
     <br>
     Default Interface Displayed on Startup
 </p>
 
 <p align="center">
-    <img src="images/rows_screen.png" style="width:800px">
+    <img src="images/rows_screen.png" style="width:600px">
     <br>
     Defining the Array Rows
 </p>
 
 <p align="center">
-    <img src="images/hardware_screen.png" style="width:800px">
+    <img src="images/hardware_screen.png" style="width:600px">
     <br>
     Hardware Count Summary
 </p>
 
 <p align="center">
-    <img src="images/rails_screen.png" style="width:800px">
+    <img src="images/rails_screen.png" style="width:600px">
     <br>
     Detailed Breakdown of Row Information
 </p>
 
 <p align="center">
-    <img src="images/data_screen.png" style="width:800px">
+    <img src="images/data_screen.png" style="width:600px">
     <br>
     Editing Application Data
 </p>
