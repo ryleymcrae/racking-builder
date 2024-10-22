@@ -31,7 +31,7 @@ Input Label | Units | Type | Description
 Input Label | Units | Type | Description
 ------------|-------|------|------------
 **Pattern** | N/A | Dropdown | Select the pattern of the mounting brackets: "Continuous" or "Staggered"
-**Rafter spacing** | Inches | Dropdown | Choose the spacing between rafters, which affects the mounting bracket placement. The application 
+**Rafter spacing** | Inches | Dropdown | Choose the spacing between rafters, which affects the mounting bracket placement
 **Panel spacing** | Inches | User-defined | Specify the space between adjacent solar panels in the array
 **Bracket inset** | Inches | User-defined | Enter the distance from the edge of the row of panels to the first mounting bracket
 **Rail protrusion** | Inches | User-defined | Define the length of rail that extends beyond the edge of the row of panels
@@ -41,32 +41,22 @@ Input Label | Units | Type | Description
 
 ## User Interface
 
-<p align="center">
-    <img src="images/default_screen.png" style="width:600px">
-    <br>
-    Default Interface Displayed on Startup
-</p>
+<img src="images/default_screen.png" alt="Default Interface Displayed on Startup" style="width:800px; display:block; margin:auto;">
 
-<p align="center">
-    <img src="images/rows_screen.png" style="width:600px">
-    <br>
-    Defining the Array Rows
-</p>
+*Default Interface Displayed on Startup*
 
-<p align="center">
-    <img src="images/hardware_screen.png" style="width:600px">
-    <br>
-    Hardware Count Summary
-</p>
+<img src="images/rows_screen.png" alt="Defining the Array Rows" style="width:800px; display:block; margin:auto;">
 
-<p align="center">
-    <img src="images/rails_screen.png" style="width:600px">
-    <br>
-    Detailed Breakdown of Row Information
-</p>
+*Defining the Array Rows*
 
-<p align="center">
-    <img src="images/data_screen.png" style="width:600px">
-    <br>
-    Editing Application Data
-</p>
+<img src="images/hardware_screen.png" alt="Hardware Count Summary" style="width:800px; display:block; margin:auto;">
+
+*Hardware Count Summary*
+
+<img src="images/rails_screen.png" alt="Detailed Breakdown of Row Information" style="width:800px; display:block; margin:auto;">
+
+*Detailed Breakdown of Row Information*
+
+<img src="images/data_screen.png" alt="Editing Application Data" style="width:800px; display:block; margin:auto;">
+
+*Editing Application Data*
