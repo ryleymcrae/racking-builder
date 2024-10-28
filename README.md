@@ -30,13 +30,14 @@ Input Label | Units | Type | Description
 
 Input Label | Units | Type | Description
 ------------|-------|------|------------
-**Pattern** | N/A | Dropdown | Select the pattern of the mounting brackets: "Continuous" or "Staggered"
-**Rafter spacing** | Inches | Dropdown | Choose the spacing between rafters, which affects the mounting bracket placement
+**Anchor Pattern** | N/A | Dropdown | Select the pattern of the mounting brackets: "Continuous" or "Staggered"
+**Max. Rail Span Btwn Anchors** | Inches | User-defined | The maximum allowable distance between anchors
+**Min. Anchor Spacing Interval** | Inches | user-defined | Defines the spacing between rafters, corrugations, or seams, which determines the placement of mounting brackets
 **Panel spacing** | Inches | User-defined | Specify the space between adjacent solar panels in the array
 **Bracket inset** | Inches | User-defined | Enter the distance from the edge of the row of panels to the first mounting bracket
 **Rail protrusion** | Inches | User-defined | Define the length of rail that extends beyond the edge of the row of panels
-**Portrait rail inset** | Inches | User-defined | Set the inset distance for the top and bottom rails from the short edge of the solar panels when they are mounted in portrait orientation
-**Landscape rail inset** | Inches | User-defined | Set the inset distance for the side rails from the long edge of the solar panels when they are mounted in landscape orientation
+**P rail inset** | Inches | User-defined | Set the inset distance for the top and bottom rails from the short edge of the solar panels when they are mounted in **portrait orientation**
+**L rail inset** | Inches | User-defined | Set the inset distance for the side rails from the long edge of the solar panels when they are mounted in **landscape orientation**
 **Truss structure** | Yes / No | Checkbox | Indicate whether the roof is a truss structure. If "Yes," the application calculates the deadload considering a weight distribution extending 1 meter beyond all edges of the mounting footprint
 
 ## User Interface
