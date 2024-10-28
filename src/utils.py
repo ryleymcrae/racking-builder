@@ -25,7 +25,7 @@ def process_fields(fields):
         # Check if the input is empty
         if value == "":
             raise ValueError(
-                f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is empty."
+                f"The value for '{fields.inputs[field_name].label._text}' is empty."
             )
 
         # Cast the value according to its type
@@ -41,7 +41,7 @@ def process_fields(fields):
             numeric_value < valid_range[0] or numeric_value > valid_range[1]
         ):
             raise ValueError(
-                f"The value for '{' '.join(word.capitalize() for word in field_name.split('_'))}' is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
+                f"The value for '{fields.inputs[field_name].label._text}' is outside the valid range of [{valid_range[0]}, {valid_range[1]}]."
             )
 
         user_inputs[field_name] = numeric_value
@@ -66,8 +66,9 @@ def get_equipment_data(row_data: List[Tuple[int, str]], rail_lengths, user_input
     panel_height = user_inputs["panel_height"]
     panel_spacing = user_inputs["panel_spacing"]
     rail_protrusion = user_inputs["rail_protrusion"]
-    rafter_spacing = float(str(user_inputs["rafter_spacing"]))
-    pattern = user_inputs["pattern"]
+    maximum_rail_span = user_inputs["max._rail_span_btwn_anchors"]
+    rafter_spacing = user_inputs["min._anchor_spacing_interval"]
+    pattern = user_inputs["anchor_pattern"]
     bracket_inset = user_inputs["bracket_inset"]
 
     # Loop over row data and compute equipment quantities
@@ -83,7 +84,7 @@ def get_equipment_data(row_data: List[Tuple[int, str]], rail_lengths, user_input
             row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
 
         rail_length = row_width + 2 * rail_protrusion
-        mount_spacing = (48 // rafter_spacing) * rafter_spacing
+        mount_spacing = (maximum_rail_span // rafter_spacing) * rafter_spacing
 
         if pattern == RackingPattern.CONTINUOUS:
             num_mounts += 2 * ((row_width - 2 * bracket_inset) // mount_spacing + 2)
@@ -108,7 +109,8 @@ def get_equipment_data(row_data: List[Tuple[int, str]], rail_lengths, user_input
         "num_mounts": int(num_mounts),
         "num_mids": num_mids,
         "num_ends": num_ends,
-        "num_splices": num_splices_total
+        "num_splices": num_splices_total,
+        "span_btwn_anchors": f'{mount_spacing:g}"',
     }
     return equipment
 
@@ -148,83 +150,6 @@ def get_row_data(row_data: List[Tuple[int, str]], rail_lengths, user_inputs) -> 
         "all_wastes": all_wastes
     }
     return row_data_results
-
-# def get_equipment_data(row_data: List[Tuple[int, str]], user_inputs):
-#     from data_manager import DataManager
-#     from enums import RackingPattern
-
-#     data_manager = DataManager()
-
-#     rail_lengths = data_manager.get_rails()
-#     num_rails = {length: 0 for length in rail_lengths}
-
-#     num_panels_total = 0
-#     num_mounts = 0
-#     num_mids = 0
-#     num_ends = 0
-#     num_splices_total = 0
-#     total_waste = 0
-#     all_wastes = []
-#     all_rails = []
-#     row_lengths = []
-
-#     panel_width = user_inputs["panel_width"]
-#     panel_height = user_inputs["panel_height"]
-#     panel_spacing = user_inputs["panel_spacing"]
-#     rail_protrusion = user_inputs["rail_protrusion"]
-#     rafter_spacing = float(str(user_inputs["rafter_spacing"]))
-#     pattern = user_inputs["pattern"]
-#     bracket_inset = user_inputs["bracket_inset"]
-
-#     for i, (num_panels, orientation) in enumerate(row_data):
-#         num_panels_total += num_panels
-#         num_ends += 4
-#         num_mids += 2 * (num_panels - 1)
-
-#         if orientation == "Landscape":
-#             row_width = num_panels * panel_height + (num_panels - 1) * panel_spacing
-#         else:
-#             row_width = num_panels * panel_width + (num_panels - 1) * panel_spacing
-
-#         rail_length = row_width + 2 * rail_protrusion
-#         mount_spacing = (48 // rafter_spacing) * rafter_spacing
-
-#         if pattern == RackingPattern.CONTINUOUS:
-#             num_mounts += 2 * ((row_width - 2 * bracket_inset) // mount_spacing + 2)
-#         else:
-#             num_mounts += (
-#                 (row_width - 2 * bracket_inset - mount_spacing / 2) // mount_spacing
-#                 + 3  # Top row
-#                 + ((row_width - 2 * bracket_inset) // mount_spacing + 2)  # Bottom row
-#             )
-
-#         rail_counts, num_splices, waste, rails = optimal_rail_selection(
-#             rail_length, rail_lengths
-#         )
-
-#         # Update the total count of rails used
-#         for rail_length, count in rail_counts.items():
-#             num_rails[rail_length] += count
-
-#         num_splices_total += num_splices
-#         total_waste += waste
-#         all_wastes.append(round(waste, 2))
-#         all_rails.append(rail_counts)
-#         row_lengths.append(round(row_width, 2))
-
-#     equipment = {
-#         "num_modules": num_panels_total,
-#         "num_rails": num_rails,
-#         "num_mounts": int(num_mounts),
-#         "num_mids": num_mids,
-#         "num_ends": num_ends,
-#         "num_splices": num_splices_total,
-#         "total_waste": f'{round(total_waste, 2)}"',
-#         "row_lengths": row_lengths,
-#         "all_rails": all_rails,
-#         "all_wastes": all_wastes,
-#     }
-#     return equipment
 
 
 def optimal_rail_selection(required_rail_length, available_rails):
@@ -275,8 +200,8 @@ def get_psf_data(row_data, user_inputs):
     panel_weight = user_inputs["panel_weight"]
     panel_spacing = user_inputs["panel_spacing"]
     bracket_inset = user_inputs["bracket_inset"]
-    portrait_rail_inset = user_inputs["portrait_rail_inset"]
-    landscape_rail_inset = user_inputs["landscape_rail_inset"]
+    portrait_rail_inset = user_inputs["p_rail_inset"]
+    landscape_rail_inset = user_inputs["l_rail_inset"]
     truss_structure = user_inputs["truss_structure"]
 
     for num_panels, orientation in row_data:

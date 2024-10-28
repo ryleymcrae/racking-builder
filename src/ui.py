@@ -77,7 +77,7 @@ class InputFields:
     def create_input_fields(self, fields):
         """Dynamically creates InputField instances based on provided fields data."""
         for key, (field_type, default_value, units, valid_range) in fields.items():
-            label = CTkLabel(self.parent, text=key.replace("_", " ").capitalize())
+            label = CTkLabel(self.parent, text=key.replace("_", " ").capitalize(), justify="left")
             if issubclass(
                 field_type, Enum
             ):  # If it's an option field, use CTkOptionMenu
@@ -185,8 +185,11 @@ class InputField:
             )
 
     def restore_default_value(self):
-        if type(self.input_widget) is CTkCheckBox and self.default_value:
-            self.input_widget.select()
+        if type(self.input_widget) is CTkCheckBox:
+            if self.default_value:
+                self.input_widget.select()
+            else:
+                self.input_widget.deselect()
         else:
             self.set(self.default_value)
 
@@ -196,7 +199,6 @@ class InputField:
 
 # Modify PanelFields to pass new field data structure to InputFields
 class PanelInputFields(InputFields):
-    # Passed to parent class and processed to create InputField instances
     _fields = {
         "panel_model": (str, "-- Select Panel --", None, None),
         "panel_width": (float, "", "in.", (25, 60)),
@@ -253,15 +255,15 @@ class PanelInputFields(InputFields):
 
 # Modify RackingFields to pass new field data structure to InputFields
 class RackingInputFields(InputFields):
-    # Passed to parent class and processed to create InputField instances
     _fields = {
-        "pattern": (RackingPattern, str(RackingPattern.CONTINUOUS), None, None),
-        "rafter_spacing": (RafterSpacing, str(RafterSpacing.SIXTEEN), "in.", None),
+        "anchor_pattern": (RackingPattern, str(RackingPattern.CONTINUOUS), None, None),
+        "max._rail_span_btwn_anchors": (float, 48, "in.", (24, 48)),
+        "min._anchor_spacing_interval": (float, 16, "in.", (8, 48)),
         "panel_spacing": (float, 0.625, "in.", (0.39, 0.7)),
         "bracket_inset": (float, 10, "in.", (4, 12)),
         "rail_protrusion": (float, 4, "in.", (2, 6)),
-        "portrait_rail_inset": (float, 16, "in.", (0, 18)),
-        "landscape_rail_inset": (float, 10, "in.", (0, 12)),
+        "p_rail_inset": (float, 16, "in.", (0, 18)),
+        "l_rail_inset": (float, 10, "in.", (0, 12)),
         "truss_structure": (bool, False, None, None),
     }
 
