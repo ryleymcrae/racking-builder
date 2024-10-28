@@ -77,17 +77,16 @@ def update_equipment_results(equipment_results_frame, equipment_data):
     )
     row += 2
 
-    for i, (key, label) in enumerate(
-        {
-            "num_modules": "Modules",
-            "num_mounts": "Mounts",
-            "num_mids": "Mids",
-            "num_ends": "Ends",
-            "num_splices": "Splices",
-            "total_waste": "Total Waste",
-        }.items()
-    ):
-        label = CTkLabel(equipment_results_frame, text=key.split("_")[1].capitalize())
+    for key, text in {
+        "num_modules": "Modules",
+        "num_mounts": "Anchors",
+        "num_mids": "Mids",
+        "num_ends": "Ends",
+        "num_splices": "Splices",
+        "total_waste": "Total Waste",
+        "span_btwn_anchors": "Span Between Anchors",
+    }.items():
+        label = CTkLabel(equipment_results_frame, text=text)
         label.grid(row=row, column=0, padx=8, sticky="w")
         value_label = CTkLabel(equipment_results_frame, text=f"{equipment_data[key]}")
         value_label.grid(row=row, column=1, padx=8, sticky="e")
