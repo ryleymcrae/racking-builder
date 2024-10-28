@@ -104,7 +104,7 @@ def update_rail_results(rail_results_frame, rail_data, psf_data):
     for child in rail_results_frame.winfo_children():
         child.destroy()
 
-    row_lengths_frame = CTkScrollableFrame(rail_results_frame, height=568, fg_color="transparent")
+    row_lengths_frame = CTkScrollableFrame(rail_results_frame, height=588, fg_color="transparent")
     row_lengths_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
     row_lengths_frame.grid_columnconfigure(0, weight=1)
 
