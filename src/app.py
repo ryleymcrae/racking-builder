@@ -10,7 +10,7 @@ from data_manager import DataManager
 class App(CTk):
     TITLE = "Racking Builder"
     WIDTH = 1000
-    HEIGHT = 700
+    HEIGHT = 660
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
