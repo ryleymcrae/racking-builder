@@ -157,18 +157,19 @@ def optimal_rail_selection(required_rail_length, available_rails):
 
     rail_combo = []  # To store the best combination found
     min_rail_length = min(available_rails)
-
-    for rail_length in sorted(available_rails, reverse=True):
-        if required_rail_length > rail_length + min_rail_length / 2:
-            main_rail_length = rail_length
-            break
-    else:
-        main_rail_length = min_rail_length
-
     remaining_length = required_rail_length
-    while remaining_length >= main_rail_length + min_rail_length:
-        rail_combo.append(main_rail_length)
-        remaining_length -= main_rail_length
+
+    if required_rail_length > max(available_rails):
+        for rail_length in sorted(available_rails, reverse=True):
+            if required_rail_length > rail_length + min_rail_length / 2:
+                main_rail_length = rail_length
+                break
+        else:
+            main_rail_length = min_rail_length
+        while remaining_length >= main_rail_length + min_rail_length:
+            rail_combo.append(main_rail_length)
+            remaining_length -= main_rail_length
+        
 
     best_last_rail_lengths = []
     min_waste = float("inf")
