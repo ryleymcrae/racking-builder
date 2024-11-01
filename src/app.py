@@ -158,7 +158,7 @@ class App(CTk):
         equipment_data.update({"total_waste": f'{round(sum(rail_data["all_wastes"]), 2)}"'})
         psf_data = get_psf_data(row_data, user_inputs)
 
-        update_equipment_results(self.tabview.get_equipment_results_frame(), equipment_data)
+        update_hardware_results(self.tabview.get_equipment_results_frame(), equipment_data)
         update_rail_results(self.tabview.get_rail_results_frame(), rail_data, psf_data)
         self.tabview.set("Hardware")
 

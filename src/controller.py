@@ -58,7 +58,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             ).pack(side=LEFT, pady=(0, 2))
 
 
-def update_equipment_results(equipment_results_frame, equipment_data):
+def update_hardware_results(equipment_results_frame, equipment_data):
     for child in equipment_results_frame.winfo_children():
         child.destroy()
 
