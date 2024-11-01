@@ -23,7 +23,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
             xwidth = int(panel_height)
         else:
             xwidth = int(panel_width)
-        row_length = round(num_panels * xwidth) + num_panels
+        row_length = round(num_panels * xwidth) + num_panels * 2
         if row_length > 680:
             max_length = max(row_length, max_length)
 
@@ -33,7 +33,7 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
         panel_height = int(panel_height * scaling_factor)
 
     for child in preview_frame.winfo_children():
-        child.grid_forget()
+        child.destroy()
 
     for row_num, (num_panels, orientation) in enumerate(row_data):
         row_frame = CTkFrame(preview_frame, fg_color="transparent")
@@ -64,14 +64,12 @@ def update_hardware_results(equipment_results_frame, equipment_data):
 
     row = 0
 
-    hardware_label = CTkLabel(
+    CTkLabel(
         equipment_results_frame, text="Hardware", anchor="w", font=("TkDefaultFont", 12, "bold"), height=20
-    )
-    hardware_label.grid(row=row, column=0, padx=8, sticky="w")
-    hardware_label = CTkLabel(
+    ).grid(row=row, column=0, padx=8, sticky="w")
+    CTkLabel(
         equipment_results_frame, text="Count", anchor="e", font=("TkDefaultFont", 12, "bold"), height=20
-    )
-    hardware_label.grid(row=row, column=1, padx=8, sticky="e")
+    ).grid(row=row, column=1, padx=8, sticky="e")
     CTkFrame(equipment_results_frame, height=2, fg_color="gray50").grid(
         row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
     )
@@ -92,8 +90,19 @@ def update_hardware_results(equipment_results_frame, equipment_data):
         value_label.grid(row=row, column=1, padx=8, sticky="e")
         row += 1
 
+    CTkLabel(
+        equipment_results_frame, text="Rail Lengths", anchor="w", font=("TkDefaultFont", 12, "bold"), height=20
+    ).grid(row=row, column=0, padx=8, pady=(14, 0), sticky="w")
+    CTkLabel(
+        equipment_results_frame, text="Count", anchor="e", font=("TkDefaultFont", 12, "bold"), height=20
+    ).grid(row=row, column=1, padx=8, pady=(14, 0), sticky="e")
+    CTkFrame(equipment_results_frame, height=2, fg_color="gray50").grid(
+        row=row + 1, columnspan=2, padx=8, pady=4, sticky="ew"
+    )
+    row += 2
+
     for rail_length, count in equipment_data["num_rails"].items():
-        label = CTkLabel(equipment_results_frame, text=f'{rail_length:g}" Rail')
+        label = CTkLabel(equipment_results_frame, text=f'{rail_length:g}"')
         label.grid(row=row, column=0, padx=8, sticky="w")
         value_label = CTkLabel(equipment_results_frame, text=str(count))
         value_label.grid(row=row, column=1, padx=8, sticky="e")
@@ -143,7 +152,7 @@ def update_rail_results(rail_results_frame, rail_data, psf_data):
         ).grid(row=1, column=1, sticky="w")
         CTkLabel(
             frame,
-            text=" ".join(
+            text=" | ".join(
                 [
                     f'{length:g}": {count}'
                     for length, count in sorted(all_rails[i].items(), reverse=True)
@@ -423,7 +432,7 @@ def edit_data(preview_frame, save_changes_callback):
     empty_frame.grid(row=4, sticky="ew")
 
     button_frame = CTkFrame(preview_frame.master)
-    button_frame.place(x=110, y=622)
+    button_frame.place(x=170, y=602)
 
     # Save and Discard Buttons
     discard_button = CTkButton(
