@@ -24,11 +24,11 @@ def update_preview_frame(preview_frame, row_data, user_inputs):
         else:
             xwidth = int(panel_width)
         row_length = round(num_panels * xwidth) + num_panels
-        if row_length > 625:
+        if row_length > 680:
             max_length = max(row_length, max_length)
 
     if max_length > 0:
-        scaling_factor = 625 / max_length
+        scaling_factor = 680 / max_length
         panel_width = int(panel_width * scaling_factor)
         panel_height = int(panel_height * scaling_factor)
 
