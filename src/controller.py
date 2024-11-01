@@ -79,12 +79,12 @@ def update_hardware_results(equipment_results_frame, equipment_data):
 
     for key, text in {
         "num_modules": "Modules",
-        "num_mounts": "Anchors",
-        "num_mids": "Mids",
-        "num_ends": "Ends",
         "num_splices": "Splices",
+        "num_ends": "Ends",
+        "num_mids": "Mids",
+        "num_mounts": "Anchors",
         "total_waste": "Total Waste",
-        "span_btwn_anchors": "Span Between Anchors",
+        "span_btwn_anchors": "Max Span Btwn Anchors",
     }.items():
         label = CTkLabel(equipment_results_frame, text=text)
         label.grid(row=row, column=0, padx=8, sticky="w")
@@ -104,7 +104,7 @@ def update_rail_results(rail_results_frame, rail_data, psf_data):
     for child in rail_results_frame.winfo_children():
         child.destroy()
 
-    row_lengths_frame = CTkScrollableFrame(rail_results_frame, height=588, fg_color="transparent")
+    row_lengths_frame = CTkScrollableFrame(rail_results_frame, height=548, fg_color="transparent")
     row_lengths_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
     row_lengths_frame.grid_columnconfigure(0, weight=1)
 
